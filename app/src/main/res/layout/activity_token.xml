@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/bg_color"
+    tools:context=".activities.TokenActivity">
+
+    <include layout="@layout/logo_toolbar" android:id="@+id/toolbar" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:layout_below="@id/toolbar">
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="TOKEN"
+            android:textSize="26sp"
+            android:textStyle="bold"
+            android:padding="12dp" />
+
+        <TextView
+            android:id="@+id/link"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/member_token"
+            android:textSize="18sp"
+            android:padding="12dp" />
+
+        <EditText
+            android:id="@+id/token"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Enter Token Here"
+            tools:text="f8rrty53gh57j9e5s23f687rg53e21e36t"
+            android:textSize="18sp"
+            android:gravity="center"
+            android:layout_margin="10dp"
+            android:background="@drawable/border"
+            android:padding="12dp" />
+
+        <Button
+            android:id="@+id/verify"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="10dp"
+            android:text="Validate My Token" />
+
+        <TextView
+            android:id="@+id/validated"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Token validated"
+            android:drawableTint="@color/text_color"
+            android:gravity="center_vertical"
+            android:drawablePadding="12sp"
+            android:drawableStart="@drawable/thumbs_up_regular"
+            android:textSize="18sp"
+            android:padding="12dp" />
+
+        <TextView
+            android:id="@+id/notValidated"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Token is not validate"
+            android:gravity="center_vertical"
+            android:drawableTint="@color/text_color"
+            android:drawablePadding="12sp"
+            android:drawableStart="@drawable/thumbs_down_regular"
+            android:textSize="18sp"
+            android:padding="12dp" />
+
+    </LinearLayout>
+
+</RelativeLayout>

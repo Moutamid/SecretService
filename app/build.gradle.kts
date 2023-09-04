@@ -37,6 +37,7 @@ android {
 
 dependencies {
     implementation("com.fxn769:stash:1.3.2")
+    implementation("com.android.volley:volley:1.2.1")
 
     implementation("androidx.appcompat:appcompat:1.6.1")
     implementation("com.google.android.material:material:1.9.0")

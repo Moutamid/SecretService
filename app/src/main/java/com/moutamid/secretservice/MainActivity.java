@@ -5,7 +5,11 @@ import androidx.appcompat.app.AppCompatActivity;
 import android.content.Intent;
 import android.content.res.ColorStateList;
 import android.os.Bundle;
+import android.widget.Toast;
 
+import com.android.volley.Request;
+import com.android.volley.RequestQueue;
+import com.android.volley.toolbox.JsonObjectRequest;
 import com.fxn.stash.Stash;
 import com.moutamid.secretservice.activities.NoContactsActivity;
 import com.moutamid.secretservice.activities.ReplyActivity;
@@ -13,9 +17,11 @@ import com.moutamid.secretservice.activities.SetTimerActivity;
 import com.moutamid.secretservice.activities.TokenActivity;
 import com.moutamid.secretservice.databinding.ActivityMainBinding;
 import com.moutamid.secretservice.utilis.Constants;
+import com.moutamid.secretservice.utilis.VolleySingleton;
 
 public class MainActivity extends AppCompatActivity {
     ActivityMainBinding binding;
+    RequestQueue requestQueue;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -30,6 +36,8 @@ public class MainActivity extends AppCompatActivity {
         binding.token.setOnClickListener(v -> {
             startActivity(new Intent(this, TokenActivity.class));
         });
+
+        requestQueue = VolleySingleton.getInstance(MainActivity.this).getRequestQueue();
 
     }
 
@@ -84,7 +92,7 @@ public class MainActivity extends AppCompatActivity {
             startActivity(new Intent(this, SetTimerActivity.class));
         });
         binding.update.setOnClickListener(v -> {
-
+            updateMessage();
         });
         binding.noContacts.setOnClickListener(v -> {
             startActivity(new Intent(this, NoContactsActivity.class));
@@ -94,4 +102,23 @@ public class MainActivity extends AppCompatActivity {
         });
 
     }
+
+    private void updateMessage() {
+        JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(Request.Method.GET, Constants.API_STANDARD_MESSAGE, null,
+                response -> {
+                    /**
+                     Stash.put(Constants.TOKEN, binding.token.getText().toString().trim());
+                     Stash.put(Constants.IS_TOKEN_VERIFY, true);
+
+                     binding.validated.setVisibility(View.VISIBLE);
+                     binding.notValidated.setVisibility(View.GONE);
+                     **/
+                },
+                error -> {
+                    Toast.makeText(this, error.getMessage(), Toast.LENGTH_LONG).show();
+                }
+        );
+        requestQueue.add(jsonObjectRequest);
+    }
+
 }

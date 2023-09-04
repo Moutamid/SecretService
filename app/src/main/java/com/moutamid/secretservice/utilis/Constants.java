@@ -45,6 +45,8 @@ public class Constants {
     public static final String END_DAY = "END_DAY";
     public static final String EXCLUDE_CONTACTS = "EXCLUDE_CONTACTS";
     public static final String UPDATED_TIME = "UPDATED_TIME";
+    public static final String API_TOKEN = "https://secret-service.be/processing_JSON_token.php";
+    public static final String API_STANDARD_MESSAGE = "https://secret-service.be/processing_JSON_standard_message.php";
 
 
     // 15 August 2023 10:27

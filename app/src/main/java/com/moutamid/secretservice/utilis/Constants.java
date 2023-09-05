@@ -1,13 +1,22 @@
 package com.moutamid.secretservice.utilis;
 
 import com.moutamid.secretservice.R;
+import com.moutamid.secretservice.receivers.SmsBroadcastReceiver;
 
 import android.app.Activity;
+import android.app.AlarmManager;
 import android.app.Dialog;
+import android.app.PendingIntent;
+import android.content.ComponentName;
+import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
+import android.database.Cursor;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Build;
+import android.provider.ContactsContract;
+import android.provider.Settings;
+import android.text.TextUtils;
 import android.view.Window;
 
 import androidx.appcompat.app.AlertDialog;
@@ -21,6 +30,7 @@ import java.io.InputStreamReader;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Locale;
 import java.util.TimeZone;
 
@@ -39,12 +49,19 @@ public class Constants {
     public static final String FROM_WEEK = "FROM_WEEK";
     public static final String TO_TIME = "TO_TIME";
     public static final String TO_WEEK = "TO_WEEK";
+    public static final String TELEGRAM = "TELEGRAM";
+    public static final String SKYPE = "SKYPE";
+    public static final String WHATSAPP = "WHATSAPP";
+    public static final String MISSED_CALLS = "MISSED_CALLS";
+    public static final String REFUSED_CALLS = "REFUSED_CALLS";
     public static final String START_DAY_TIME = "START_DAY_TIME";
     public static final String END_DAY_TIME = "END_DAY_TIME";
     public static final String START_DAY = "START_DAY";
     public static final String END_DAY = "END_DAY";
     public static final String EXCLUDE_CONTACTS = "EXCLUDE_CONTACTS";
     public static final String UPDATED_TIME = "UPDATED_TIME";
+    public static final String MESSAGE = "MESSAGE";
+    public static final String Communication_Channel  = "Communication_Channel";
     public static final String API_TOKEN = "https://secret-service.be/processing_JSON_token.php";
     public static final String API_STANDARD_MESSAGE = "https://secret-service.be/processing_JSON_standard_message.php";
 
@@ -54,13 +71,15 @@ public class Constants {
         return new SimpleDateFormat(DATE_FORMAT, Locale.getDefault()).format(date);
     }
     public static String getFormattedTime(long time){
-        SimpleDateFormat sdf = new SimpleDateFormat(TIME_FORMAT, Locale.UK);
-        sdf.setTimeZone(TimeZone.getTimeZone("UTC"));
-        String formattedTime = sdf.format(time);
-        return formattedTime;
+        SimpleDateFormat sdf = new SimpleDateFormat(TIME_FORMAT, Locale.getDefault());
+//        sdf.setTimeZone(TimeZone.getTimeZone("UTC"));
+        return sdf.format(time);
     }
     public static String getFormattedDay(long time){
         return new SimpleDateFormat(DAY_FORMAT, Locale.getDefault()).format(time);
+    }
+    public static String getFormattedHours(long time) {
+        return new SimpleDateFormat("HH", Locale.getDefault()).format(time);
     }
 
     public static void initDialog(Context context){
@@ -71,12 +90,68 @@ public class Constants {
         dialog.setCancelable(false);
     }
 
+    private static final String ENABLED_NOTIFICATION_LISTENERS = "enabled_notification_listeners";
+
+    public static boolean isNotificationServiceEnabled(Context context) {
+        String pkgName = context.getPackageName();
+        final String flat = Settings.Secure.getString(context.getContentResolver(),
+                ENABLED_NOTIFICATION_LISTENERS);
+        if (!TextUtils.isEmpty(flat)) {
+            final String[] names = flat.split(":");
+            for (int i = 0; i < names.length; i++) {
+                final ComponentName cn = ComponentName.unflattenFromString(names[i]);
+                if (cn != null) {
+                    if (TextUtils.equals(pkgName, cn.getPackageName())) {
+                        return true;
+                    }
+                }
+            }
+        }
+        return false;
+    }
+
     public static void showDialog(){
         dialog.show();
     }
 
     public static void dismissDialog(){
         dialog.dismiss();
+    }
+
+    public static void scheduleSmsSendingAtSpecificTime(ArrayList<String> contacts, long timeInMillis, Context context) {
+        Intent intent = new Intent(context, SmsBroadcastReceiver.class);
+        intent.putExtra("contacts", contacts.toArray(new String[0]));
+
+        PendingIntent pendingIntent = PendingIntent.getBroadcast(context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+        AlarmManager alarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
+
+        if (alarmManager != null) {
+            alarmManager.setExact(AlarmManager.RTC_WAKEUP, timeInMillis, pendingIntent);
+        }
+    }
+
+    public static ArrayList<String> getAllContacts(Context context) {
+        ArrayList<String> contacts = new ArrayList<>();
+        ContentResolver contentResolver = context.getContentResolver();
+
+        Cursor cursor = contentResolver.query(
+                ContactsContract.CommonDataKinds.Phone.CONTENT_URI,
+                null,
+                null,
+                null,
+                null
+        );
+
+        if (cursor != null) {
+            while (cursor.moveToNext()) {
+                int i = cursor.getColumnIndex(ContactsContract.CommonDataKinds.Phone.NUMBER);
+                String phoneNumber = cursor.getString(i);
+                contacts.add(phoneNumber);
+            }
+            cursor.close();
+        }
+
+        return contacts;
     }
 
     public static void checkApp(Activity activity) {

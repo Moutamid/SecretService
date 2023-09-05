@@ -10,21 +10,20 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.fxn.stash.Stash;
 import com.moutamid.secretservice.R;
-import com.moutamid.secretservice.listners.ContactDeleteListners;
 import com.moutamid.secretservice.models.ContactModel;
+import com.moutamid.secretservice.utilis.Constants;
 
 import java.util.ArrayList;
 
 public class ContactsAdapter extends RecyclerView.Adapter<ContactsAdapter.ContactVH> {
     Context context;
     ArrayList<ContactModel> list;
-    ContactDeleteListners contactDeleteListners;
 
-    public ContactsAdapter(Context context, ArrayList<ContactModel> list, ContactDeleteListners contactDeleteListners) {
+    public ContactsAdapter(Context context, ArrayList<ContactModel> list ) {
         this.context = context;
         this.list = list;
-        this.contactDeleteListners = contactDeleteListners;
     }
 
 
@@ -38,7 +37,11 @@ public class ContactsAdapter extends RecyclerView.Adapter<ContactsAdapter.Contac
     public void onBindViewHolder(@NonNull ContactVH holder, int position) {
         ContactModel model = list.get(holder.getAdapterPosition());
         holder.name.setText(model.getContactName() + " (" + model.getContactNumber() +")");
-        holder.remove.setOnClickListener(v -> contactDeleteListners.onClick(list.get(holder.getAdapterPosition())));
+        holder.remove.setOnClickListener(v -> {
+            list.remove(model);
+            Stash.put(Constants.EXCLUDE_CONTACTS, list);
+            notifyItemRemoved(holder.getAdapterPosition());
+        });
     }
 
     @Override

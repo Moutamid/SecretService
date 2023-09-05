@@ -22,6 +22,13 @@
             android:textSize="26sp"
             android:textStyle="bold"
             android:padding="12dp" />
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Chosse your active Communication Channels"
+            android:textSize="18sp"
+            android:paddingHorizontal="12dp"
+            android:textStyle="bold" />
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -49,12 +56,14 @@
                     android:padding="12dp">
 
                     <ImageView
+                        android:id="@+id/telegramIcon"
                         android:layout_width="36dp"
                         android:layout_height="36dp"
                         android:src="@drawable/telegram"
                         app:tint="@color/white" />
 
                     <TextView
+                        android:id="@+id/telegramText"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="10dp"
@@ -85,12 +94,14 @@
                     android:padding="12dp">
 
                     <ImageView
+                        android:id="@+id/skypeIcon"
                         android:layout_width="36dp"
                         android:layout_height="36dp"
                         android:src="@drawable/skype"
                         app:tint="@color/white" />
 
                     <TextView
+                        android:id="@+id/skypeText"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="10dp"
@@ -120,12 +131,14 @@
                     android:padding="12dp">
 
                     <ImageView
+                        android:id="@+id/whatsIcon"
                         android:layout_width="36dp"
                         android:layout_height="36dp"
                         android:src="@drawable/whatsapp"
                         app:tint="@color/white" />
 
                     <TextView
+                        android:id="@+id/whatsText"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="10dp"
@@ -164,12 +177,14 @@
                     android:padding="12dp">
 
                     <ImageView
+                        android:id="@+id/missedIcon"
                         android:layout_width="36dp"
                         android:layout_height="36dp"
-                        android:src="@drawable/telegram"
+                        android:src="@drawable/missed_call"
                         app:tint="@color/white" />
 
                     <TextView
+                        android:id="@+id/missedText"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="10dp"
@@ -185,7 +200,6 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="5dp"
-                android:layout_marginEnd="5dp"
                 android:layout_weight="1"
                 app:cardBackgroundColor="@color/bg_color_trans"
                 app:cardCornerRadius="12dp"
@@ -200,12 +214,14 @@
                     android:padding="12dp">
 
                     <ImageView
+                        android:id="@+id/refusedIcon"
                         android:layout_width="36dp"
                         android:layout_height="36dp"
-                        android:src="@drawable/skype"
+                        android:src="@drawable/refused_call"
                         app:tint="@color/white" />
 
                     <TextView
+                        android:id="@+id/refusedText"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="10dp"
@@ -225,6 +241,7 @@
                 app:cardBackgroundColor="@color/bg_color_trans"
                 app:cardCornerRadius="12dp"
                 app:cardElevation="0dp"
+                android:visibility="gone"
                 app:strokeWidth="0dp">
 
                 <LinearLayout

@@ -7,6 +7,7 @@ import android.app.Activity;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.Toast;
 
@@ -15,11 +16,14 @@ import com.android.volley.Network;
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
+import com.android.volley.VolleyError;
 import com.android.volley.toolbox.BasicNetwork;
 import com.android.volley.toolbox.DiskBasedCache;
 import com.android.volley.toolbox.HurlStack;
 import com.android.volley.toolbox.JsonObjectRequest;
+import com.android.volley.toolbox.StringRequest;
 import com.fxn.stash.Stash;
+import com.moutamid.secretservice.MainActivity;
 import com.moutamid.secretservice.R;
 import com.moutamid.secretservice.databinding.ActivityTokenBinding;
 import com.moutamid.secretservice.utilis.Constants;
@@ -33,6 +37,9 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 
 public class TokenActivity extends AppCompatActivity {
     ActivityTokenBinding binding;
@@ -43,6 +50,8 @@ public class TokenActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         binding = ActivityTokenBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
+
+        Constants.initDialog(this);
 
         binding.toolbar.back.setOnClickListener(v -> onBackPressed());
 
@@ -63,28 +72,58 @@ public class TokenActivity extends AppCompatActivity {
         requestQueue = VolleySingleton.getInstance(TokenActivity.this).getRequestQueue();
 
         binding.verify.setOnClickListener(v -> {
+            Constants.showDialog();
             checkToken();
         });
 
     }
 
     public void checkToken() {
-        JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(Request.Method.GET, Constants.API_TOKEN, null,
-                response -> {
-                    /**
-                    Stash.put(Constants.TOKEN, binding.token.getText().toString().trim());
-                    Stash.put(Constants.IS_TOKEN_VERIFY, true);
 
-                    binding.validated.setVisibility(View.VISIBLE);
-                    binding.notValidated.setVisibility(View.GONE);
-                    **/
+        StringRequest stringRequest = new StringRequest(Request.Method.POST, Constants.API_TOKEN,
+                new Response.Listener<String>() {
+                    @Override
+                    public void onResponse(String response) {
+                        runOnUiThread(Constants::dismissDialog);
+                        Log.d("TOKEN_CHECK", response.toString());
+                        try {
+                            JSONObject obj = new JSONObject(response);
+                            String error = obj.getString("error");
+                            if (error == "false"){
+                                Stash.put(Constants.TOKEN, binding.token.getText().toString().trim());
+                                Stash.put(Constants.IS_TOKEN_VERIFY, true);
+                                binding.validated.setVisibility(View.VISIBLE);
+                                binding.notValidated.setVisibility(View.GONE);
+                                Toast.makeText(TokenActivity.this, "Token Updated", Toast.LENGTH_SHORT).show();
+                            } else {
+                                Stash.put(Constants.IS_TOKEN_VERIFY, false);
+                                Toast.makeText(TokenActivity.this, "Token is not valid", Toast.LENGTH_SHORT).show();
+                            }
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                            Toast.makeText(TokenActivity.this, "Something went wrong!", Toast.LENGTH_SHORT).show();
+                        }
+                    }
                 },
-                error -> {
-                    Toast.makeText(this, error.getMessage(), Toast.LENGTH_LONG).show();
+                new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+                        runOnUiThread(Constants::dismissDialog);
+                        Log.d("TOKEN_CHECK", error.getMessage());
+                        Toast.makeText(TokenActivity.this, error.getMessage(), Toast.LENGTH_SHORT).show();
+                    }
                 }
-        );
+        ) {
+            @Override
+            protected Map<String, String> getParams() {
+                Map<String, String> params = new HashMap<>();
+                params.put("token", binding.token.getText().toString().trim());
+                return params;
+            }
+        };
 
-        requestQueue.add(jsonObjectRequest);
+
+        requestQueue.add(stringRequest);
     }
 
 }

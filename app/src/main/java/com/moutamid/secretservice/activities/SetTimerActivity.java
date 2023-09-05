@@ -1,8 +1,14 @@
 package com.moutamid.secretservice.activities;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 
+import android.Manifest;
 import android.app.DatePickerDialog;
+import android.app.PendingIntent;
+import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.TextView;
@@ -11,19 +17,25 @@ import android.widget.Toast;
 import com.fxn.stash.Stash;
 import com.google.android.material.timepicker.MaterialTimePicker;
 import com.google.android.material.timepicker.TimeFormat;
+import com.moutamid.secretservice.MainActivity;
 import com.moutamid.secretservice.R;
 import com.moutamid.secretservice.databinding.ActivitySetTimerBinding;
+import com.moutamid.secretservice.models.ContactModel;
+import com.moutamid.secretservice.receivers.MissedCallReceiver;
+import com.moutamid.secretservice.receivers.SmsBroadcastReceiver;
 import com.moutamid.secretservice.utilis.Constants;
 
 import org.w3c.dom.Text;
 
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Locale;
 
 public class SetTimerActivity extends AppCompatActivity {
     ActivitySetTimerBinding binding;
     final Calendar calendar = Calendar.getInstance();
+    String[] communication_channel = new String[]{};
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -31,6 +43,11 @@ public class SetTimerActivity extends AppCompatActivity {
         setContentView(binding.getRoot());
 
         binding.toolbar.back.setOnClickListener(v -> onBackPressed());
+
+        if (ContextCompat.checkSelfPermission(SetTimerActivity.this, Manifest.permission.SEND_SMS) != PackageManager.PERMISSION_GRANTED) {
+            shouldShowRequestPermissionRationale(Manifest.permission.SEND_SMS);
+            ActivityCompat.requestPermissions(SetTimerActivity.this, new String[]{Manifest.permission.SEND_SMS}, 2);
+        }
 
         if (Stash.getInt(Constants.TIME, 3) == 0){
             binding.timeActivate.setChecked(true);
@@ -70,6 +87,7 @@ public class SetTimerActivity extends AppCompatActivity {
             binding.timeActivate.setChecked(true);
             binding.dateActivate.setChecked(false);
             binding.weekActivate.setChecked(false);
+            startBroadcast();
         });
 
         binding.dateActivate.setOnClickListener(v -> {
@@ -77,6 +95,7 @@ public class SetTimerActivity extends AppCompatActivity {
             binding.timeActivate.setChecked(false);
             binding.dateActivate.setChecked(true);
             binding.weekActivate.setChecked(false);
+            startBroadcast();
         });
 
         binding.weekActivate.setOnClickListener(v -> {
@@ -84,6 +103,7 @@ public class SetTimerActivity extends AppCompatActivity {
             binding.timeActivate.setChecked(false);
             binding.dateActivate.setChecked(false);
             binding.weekActivate.setChecked(true);
+            startBroadcast();
         });
 
         binding.fromTime.setOnClickListener(v -> openTimePicker((TextView) v , Constants.FROM_TIME));
@@ -101,6 +121,43 @@ public class SetTimerActivity extends AppCompatActivity {
             new DatePickerDialog(this, dateEnd, calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH), calendar.get(Calendar.DAY_OF_MONTH)).show();
         });
 
+    }
+
+    private void startBroadcast(){
+        if (Stash.getBoolean(Constants.IS_ON)){
+            communication_channel = Stash.getString(Constants.Communication_Channel, "").split(", ");
+            for (String channel : communication_channel){
+                if (channel.equals(Constants.TELEGRAM)) {
+
+                }
+                if (channel.equals(Constants.SKYPE)) {
+
+                }
+                if (channel.equals(Constants.WHATSAPP)) {
+
+                }
+                if (channel.equals(Constants.MISSED_CALLS)) {
+                    Intent intent = new Intent(SetTimerActivity.this, MissedCallReceiver.class);
+                    startBroadcast();
+                    PendingIntent pendingIntent = PendingIntent.getBroadcast(SetTimerActivity.this, 0, intent, PendingIntent.FLAG_IMMUTABLE);
+                }
+                if (channel.equals(Constants.REFUSED_CALLS)) {
+
+                }
+            }
+        }
+    }
+
+    private void start() {
+        ArrayList<String> excludedContacts = new ArrayList<>();
+        ArrayList<ContactModel> list = Stash.getArrayList(Constants.EXCLUDE_CONTACTS, ContactModel.class);
+        for (ContactModel model : list){
+            excludedContacts.add(model.getContactNumber());
+        }
+        long timeInMillis = System.currentTimeMillis() + 5000; // TODO
+
+        ArrayList<String> contactsToSend = Constants.getAllContacts(SetTimerActivity.this);
+        Constants.scheduleSmsSendingAtSpecificTime(contactsToSend, timeInMillis, SetTimerActivity.this);
     }
 
     private void openTimePicker(TextView textView, String constant) {
@@ -126,6 +183,11 @@ public class SetTimerActivity extends AppCompatActivity {
             String formattedTime = new SimpleDateFormat(form, Locale.getDefault()).format(reminder);
             textView.setText(formattedTime);
             Stash.put(constant, reminder);
+
+            if (binding.timeActivate.isChecked() || binding.dateActivate.isChecked() || binding.weekActivate.isChecked()) {
+                startBroadcast();
+            }
+
         });
 
         timePicker.show(getSupportFragmentManager(), "timePicker");

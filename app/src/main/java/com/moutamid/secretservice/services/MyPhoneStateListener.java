@@ -7,6 +7,7 @@ import android.telephony.PhoneStateListener;
 import android.telephony.SmsManager;
 import android.telephony.TelephonyManager;
 import android.util.Log;
+import android.widget.Toast;
 
 import com.fxn.stash.Stash;
 import com.moutamid.secretservice.models.ContactModel;
@@ -19,14 +20,64 @@ public class MyPhoneStateListener extends PhoneStateListener {
     private Context context;
     String TAG = "MissedCallReceiver";
 
+    int lastState = TelephonyManager.CALL_STATE_IDLE;
+    boolean isIncoming;
+
     public MyPhoneStateListener(Context context) {
         this.context = context;
     }
+
 
     @Override
     public void onCallStateChanged(int state, String incomingNumber) {
         super.onCallStateChanged(state, incomingNumber);
 
+        if(lastState == state){
+            //No change
+            return;
+        }
+        switch (state) {
+            case TelephonyManager.CALL_STATE_RINGING:
+                isIncoming = true;
+                // incoming call started
+                break;
+            case TelephonyManager.CALL_STATE_OFFHOOK:
+                //Transition of ringing->offhook are pickups of incoming calls.  Nothing down on them
+                if(lastState != TelephonyManager.CALL_STATE_RINGING){
+                    isIncoming = false;
+                    //outgoing call started
+                }
+                break;
+            case TelephonyManager.CALL_STATE_IDLE:
+                //End of call(Idle).  The type depends on the previous state(s)
+                if(lastState == TelephonyManager.CALL_STATE_RINGING){
+                    //toast here for missed call
+                    if (Stash.getBoolean(Constants.IS_ON)) {
+                        Toast.makeText(context, "Missed Call", Toast.LENGTH_SHORT).show();
+                        Log.d(TAG, "isMissedCall");
+                        if (isWithinTimeWindow(incomingNumber, Constants.MISSED_CALLS)){
+                            Log.d(TAG, "isWithinTimeWindow");
+                            sendAutoMessage(incomingNumber, Stash.getString(Constants.MESSAGE, ""));
+                        }
+                    }
+                }
+                else if(isIncoming){
+                    //incoming call ended
+                    if (Stash.getBoolean(Constants.IS_ON)) {
+                        if (isWithinTimeWindow(incomingNumber, Constants.REFUSED_CALLS)){
+                            Log.d(TAG, "isWithinTimeWindow");
+                            sendAutoMessage(incomingNumber, Stash.getString(Constants.MESSAGE, ""));
+                        }
+                    }
+                }
+                else{
+                    //outgoing call ended
+                }
+                break;
+        }
+        lastState = state;
+
+    /*
         if (state == TelephonyManager.CALL_STATE_RINGING) {
             // A call is ringing, check if it's a missed call
             if (Stash.getBoolean(Constants.IS_ON)) {
@@ -45,21 +96,21 @@ public class MyPhoneStateListener extends PhoneStateListener {
                     }
                 }
             }
-        }
+        } */
     }
 
-    private boolean isMissedCall(Context context, String phoneNumber) {
-        String[] projection = {CallLog.Calls.TYPE};
-        String selection = CallLog.Calls.NUMBER + " = ? AND " + CallLog.Calls.TYPE + " = ?";
-        String[] selectionArgs = {phoneNumber, String.valueOf(CallLog.Calls.MISSED_TYPE)};
-        Cursor cursor = context.getContentResolver().query(CallLog.Calls.CONTENT_URI, projection, selection, selectionArgs, null);
-        if (cursor != null) {
-            boolean isMissed = cursor.moveToNext();
-            cursor.close();
-            return isMissed;
-        }
-        return false;
-    }
+//    private boolean isMissedCall(Context context, String phoneNumber) {
+//        String[] projection = {CallLog.Calls.TYPE};
+//        String selection = CallLog.Calls.NUMBER + " = ? AND " + CallLog.Calls.TYPE + " = ?";
+//        String[] selectionArgs = {phoneNumber, String.valueOf(CallLog.Calls.MISSED_TYPE)};
+//        Cursor cursor = context.getContentResolver().query(CallLog.Calls.CONTENT_URI, projection, selection, selectionArgs, null);
+//        if (cursor != null) {
+//            boolean isMissed = cursor.moveToNext();
+//            cursor.close();
+//            return isMissed;
+//        }
+//        return false;
+//    }
 
     private boolean isWithinTimeWindow(String phoneNumber, String source) {
         int startTimeHour = 0;

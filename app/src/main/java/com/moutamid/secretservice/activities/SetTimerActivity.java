@@ -1,5 +1,6 @@
 package com.moutamid.secretservice.activities;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
@@ -10,11 +11,14 @@ import android.app.PendingIntent;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.fxn.stash.Stash;
+import com.google.android.material.chip.Chip;
+import com.google.android.material.chip.ChipGroup;
 import com.google.android.material.timepicker.MaterialTimePicker;
 import com.google.android.material.timepicker.TimeFormat;
 import com.moutamid.secretservice.MainActivity;
@@ -22,7 +26,6 @@ import com.moutamid.secretservice.R;
 import com.moutamid.secretservice.databinding.ActivitySetTimerBinding;
 import com.moutamid.secretservice.models.ContactModel;
 import com.moutamid.secretservice.receivers.MissedCallReceiver;
-import com.moutamid.secretservice.receivers.SmsBroadcastReceiver;
 import com.moutamid.secretservice.utilis.Constants;
 
 import org.w3c.dom.Text;
@@ -30,6 +33,7 @@ import org.w3c.dom.Text;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.List;
 import java.util.Locale;
 
 public class SetTimerActivity extends AppCompatActivity {
@@ -66,6 +70,33 @@ public class SetTimerActivity extends AppCompatActivity {
 
         binding.fromDayStart.setText(Constants.getFormattedDay(Stash.getLong(Constants.START_DAY, 0)));
         binding.fromDayEnd.setText(Constants.getFormattedDay(Stash.getLong(Constants.END_DAY, 0)));
+
+        ArrayList<String> stashDays = Stash.getArrayList(Constants.WEEK_DAYS, String.class);
+
+        if (stashDays.size() == 0){
+            ArrayList<String> days = getDays();
+            Stash.put(Constants.WEEK_DAYS, days);
+            for (int i = 0; i < binding.days.getChildCount(); i++) {
+                Chip chip = (Chip) binding.days.getChildAt(i);
+                chip.setChecked(true);
+            }
+        } else {
+            for (String day : stashDays){
+                for (int i = 0; i < binding.days.getChildCount(); i++) {
+                    Chip chip = (Chip) binding.days.getChildAt(i);
+                    if (day.equals(chip.getText().toString())){
+                        chip.setChecked(true);
+                    }
+                }
+            }
+        }
+
+        binding.days.setOnCheckedStateChangeListener((group, checkedIds) -> {
+            Log.d("RECIEVER123", checkedIds.toString());
+            ArrayList<String> days = getDays();
+            Log.d("RECIEVER123", days.toString());
+            Stash.put(Constants.WEEK_DAYS, days);
+        });
 
         DatePickerDialog.OnDateSetListener dateStart = (datePicker, year, month, day) -> {
             calendar.set(Calendar.YEAR, year);
@@ -124,6 +155,7 @@ public class SetTimerActivity extends AppCompatActivity {
     }
 
     private void startBroadcast(){
+
         if (Stash.getBoolean(Constants.IS_ON)){
             communication_channel = Stash.getString(Constants.Communication_Channel, "").split(", ");
             for (String channel : communication_channel){
@@ -137,9 +169,7 @@ public class SetTimerActivity extends AppCompatActivity {
 
                 }
                 if (channel.equals(Constants.MISSED_CALLS)) {
-                    Intent intent = new Intent(SetTimerActivity.this, MissedCallReceiver.class);
-                    startBroadcast();
-                    PendingIntent pendingIntent = PendingIntent.getBroadcast(SetTimerActivity.this, 0, intent, PendingIntent.FLAG_IMMUTABLE);
+
                 }
                 if (channel.equals(Constants.REFUSED_CALLS)) {
 
@@ -148,16 +178,15 @@ public class SetTimerActivity extends AppCompatActivity {
         }
     }
 
-    private void start() {
-        ArrayList<String> excludedContacts = new ArrayList<>();
-        ArrayList<ContactModel> list = Stash.getArrayList(Constants.EXCLUDE_CONTACTS, ContactModel.class);
-        for (ContactModel model : list){
-            excludedContacts.add(model.getContactNumber());
+    private ArrayList<String> getDays() {
+        ArrayList<String> day = new ArrayList<>();
+        for (int i = 0; i < binding.days.getChildCount(); i++) {
+            Chip chip = (Chip) binding.days.getChildAt(i);
+            if (chip.isChecked()){
+                day.add(chip.getText().toString());
+            }
         }
-        long timeInMillis = System.currentTimeMillis() + 5000; // TODO
-
-        ArrayList<String> contactsToSend = Constants.getAllContacts(SetTimerActivity.this);
-        Constants.scheduleSmsSendingAtSpecificTime(contactsToSend, timeInMillis, SetTimerActivity.this);
+        return day;
     }
 
     private void openTimePicker(TextView textView, String constant) {

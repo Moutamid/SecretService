@@ -1,15 +1,25 @@
 package com.moutamid.secretservice;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 
 import android.Manifest;
+import android.app.Dialog;
+import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.res.ColorStateList;
+import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
+import android.provider.ContactsContract;
+import android.telephony.PhoneStateListener;
+import android.telephony.SmsManager;
+import android.telephony.TelephonyManager;
 import android.util.Log;
+import android.view.Window;
+import android.widget.Button;
 import android.widget.Toast;
 
 import com.android.volley.Request;
@@ -24,6 +34,7 @@ import com.moutamid.secretservice.activities.ReplyActivity;
 import com.moutamid.secretservice.activities.SetTimerActivity;
 import com.moutamid.secretservice.activities.TokenActivity;
 import com.moutamid.secretservice.databinding.ActivityMainBinding;
+import com.moutamid.secretservice.services.MyPhoneStateListener;
 import com.moutamid.secretservice.utilis.Constants;
 import com.moutamid.secretservice.utilis.VolleySingleton;
 
@@ -37,7 +48,12 @@ import java.util.Map;
 public class MainActivity extends AppCompatActivity {
     ActivityMainBinding binding;
     RequestQueue requestQueue;
-
+    String[] permissions = new String[] {
+            Manifest.permission.READ_CONTACTS,
+            Manifest.permission.SEND_SMS,
+            Manifest.permission.READ_PHONE_STATE,
+            Manifest.permission.READ_CALL_LOG
+    };
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -49,10 +65,14 @@ public class MainActivity extends AppCompatActivity {
         binding.time.setText(time);
 
         if (ContextCompat.checkSelfPermission(MainActivity.this, android.Manifest.permission.READ_CONTACTS) != PackageManager.PERMISSION_GRANTED ||
+        ContextCompat.checkSelfPermission(MainActivity.this, android.Manifest.permission.READ_CALL_LOG) != PackageManager.PERMISSION_GRANTED ||
+        ContextCompat.checkSelfPermission(MainActivity.this, android.Manifest.permission.READ_PHONE_STATE) != PackageManager.PERMISSION_GRANTED ||
                 ContextCompat.checkSelfPermission(MainActivity.this, android.Manifest.permission.SEND_SMS) != PackageManager.PERMISSION_GRANTED) {
             shouldShowRequestPermissionRationale(android.Manifest.permission.READ_CONTACTS);
             shouldShowRequestPermissionRationale(android.Manifest.permission.SEND_SMS);
-            ActivityCompat.requestPermissions(MainActivity.this, new String[]{Manifest.permission.READ_CONTACTS, Manifest.permission.SEND_SMS}, 2);
+            shouldShowRequestPermissionRationale(android.Manifest.permission.READ_CALL_LOG);
+            shouldShowRequestPermissionRationale(android.Manifest.permission.READ_PHONE_STATE);
+            ActivityCompat.requestPermissions(MainActivity.this, permissions, 2);
         }
 
         binding.token.setOnClickListener(v -> {
@@ -61,6 +81,25 @@ public class MainActivity extends AppCompatActivity {
 
         requestQueue = VolleySingleton.getInstance(MainActivity.this).getRequestQueue();
 
+    }
+
+    private void registerPhoneStateListener() {
+        TelephonyManager telephonyManager = (TelephonyManager) getSystemService(Context.TELEPHONY_SERVICE);
+        MyPhoneStateListener phoneStateListener = new MyPhoneStateListener(this);
+        telephonyManager.listen(phoneStateListener, PhoneStateListener.LISTEN_CALL_STATE);
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        if (requestCode == 2) {
+            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+//                 registerPhoneStateListener();  TODO
+                if (!Constants.isNotificationServiceEnabled(MainActivity.this)){
+                    Constants.showNotificationDialog(MainActivity.this);
+                }
+            }
+        }
     }
 
     @Override
@@ -99,16 +138,30 @@ public class MainActivity extends AppCompatActivity {
         }
 
         binding.onOff.setOnClickListener(v -> {
-            if (Stash.getBoolean(Constants.IS_ON, false)) {
-                binding.onOff.setCardBackgroundColor(getResources().getColor(R.color.bg_color_trans));
-                binding.onOffICO.setImageTintList(ColorStateList.valueOf(getResources().getColor(R.color.white)));
-                binding.onOffText.setTextColor(getResources().getColor(R.color.text_color));
-                Stash.put(Constants.IS_ON, false);
+            if (!Stash.getString(Constants.Communication_Channel, "").isEmpty()) {
+                if (Stash.getInt(Constants.TIME, 3) < 3){
+                    if (Stash.getBoolean(Constants.IS_ON, false)) {
+                        binding.onOff.setCardBackgroundColor(getResources().getColor(R.color.bg_color_trans));
+                        binding.onOffICO.setImageTintList(ColorStateList.valueOf(getResources().getColor(R.color.white)));
+                        binding.onOffText.setTextColor(getResources().getColor(R.color.text_color));
+                        Stash.put(Constants.IS_ON, false);
+                    } else {
+                        binding.onOff.setCardBackgroundColor(getResources().getColor(R.color.text_color));
+                        binding.onOffICO.setImageTintList(ColorStateList.valueOf(getResources().getColor(R.color.bg_color)));
+                        binding.onOffText.setTextColor(getResources().getColor(R.color.bg_color));
+                        Stash.put(Constants.IS_ON, true);
+
+                        if (Stash.getString(Constants.UPDATED_TIME, "N/A").equals("N/A")) {
+                            Toast.makeText(this, "Please Update your message", Toast.LENGTH_SHORT).show();
+                        }
+
+                    }
+
+                } else {
+                    Toast.makeText(this, "Please activate time", Toast.LENGTH_SHORT).show();
+                }
             } else {
-                binding.onOff.setCardBackgroundColor(getResources().getColor(R.color.text_color));
-                binding.onOffICO.setImageTintList(ColorStateList.valueOf(getResources().getColor(R.color.bg_color)));
-                binding.onOffText.setTextColor(getResources().getColor(R.color.bg_color));
-                Stash.put(Constants.IS_ON, true);
+                Toast.makeText(this, "Please add some Reply TO Channels", Toast.LENGTH_SHORT).show();
             }
         });
         binding.timer.setOnClickListener(v -> {

@@ -1,7 +1,6 @@
 package com.moutamid.secretservice.utilis;
 
 import com.moutamid.secretservice.R;
-import com.moutamid.secretservice.receivers.SmsBroadcastReceiver;
 
 import android.app.Activity;
 import android.app.AlarmManager;
@@ -17,7 +16,10 @@ import android.os.Build;
 import android.provider.ContactsContract;
 import android.provider.Settings;
 import android.text.TextUtils;
+import android.view.Gravity;
+import android.view.ViewGroup;
 import android.view.Window;
+import android.widget.Button;
 
 import androidx.appcompat.app.AlertDialog;
 
@@ -44,6 +46,7 @@ public class Constants {
     public static final String IS_TOKEN_VERIFY = "IS_TOKEN_VERIFY";
     public static final String TOKEN = "TOKEN";
     public static final String TIME = "TIME";
+    public static final String WEEK_DAYS = "WEEK_DAYS";
     public static final String SELECTED_TIME = "SELECTED_TIME";
     public static final String FROM_TIME = "FROM_TIME";
     public static final String FROM_WEEK = "FROM_WEEK";
@@ -90,6 +93,26 @@ public class Constants {
         dialog.setCancelable(false);
     }
 
+    public static void showNotificationDialog(Context context) {
+        Dialog dialog = new Dialog(context);
+        dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
+        dialog.setContentView(R.layout.notification_permission);
+        dialog.getWindow().setBackgroundDrawable(new ColorDrawable(android.graphics.Color.TRANSPARENT));
+        dialog.setCancelable(true);
+
+        Button enable = dialog.findViewById(R.id.enable);
+
+        enable.setOnClickListener(v -> {
+            Intent intent = new Intent("android.settings.ACTION_NOTIFICATION_LISTENER_SETTINGS");
+            context.startActivity(intent);
+            dialog.dismiss();
+        });
+
+        dialog.show();
+        dialog.getWindow().setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+        dialog.getWindow().setGravity(Gravity.CENTER);
+    }
+
     private static final String ENABLED_NOTIFICATION_LISTENERS = "enabled_notification_listeners";
 
     public static boolean isNotificationServiceEnabled(Context context) {
@@ -116,42 +139,6 @@ public class Constants {
 
     public static void dismissDialog(){
         dialog.dismiss();
-    }
-
-    public static void scheduleSmsSendingAtSpecificTime(ArrayList<String> contacts, long timeInMillis, Context context) {
-        Intent intent = new Intent(context, SmsBroadcastReceiver.class);
-        intent.putExtra("contacts", contacts.toArray(new String[0]));
-
-        PendingIntent pendingIntent = PendingIntent.getBroadcast(context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
-        AlarmManager alarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
-
-        if (alarmManager != null) {
-            alarmManager.setExact(AlarmManager.RTC_WAKEUP, timeInMillis, pendingIntent);
-        }
-    }
-
-    public static ArrayList<String> getAllContacts(Context context) {
-        ArrayList<String> contacts = new ArrayList<>();
-        ContentResolver contentResolver = context.getContentResolver();
-
-        Cursor cursor = contentResolver.query(
-                ContactsContract.CommonDataKinds.Phone.CONTENT_URI,
-                null,
-                null,
-                null,
-                null
-        );
-
-        if (cursor != null) {
-            while (cursor.moveToNext()) {
-                int i = cursor.getColumnIndex(ContactsContract.CommonDataKinds.Phone.NUMBER);
-                String phoneNumber = cursor.getString(i);
-                contacts.add(phoneNumber);
-            }
-            cursor.close();
-        }
-
-        return contacts;
     }
 
     public static void checkApp(Activity activity) {

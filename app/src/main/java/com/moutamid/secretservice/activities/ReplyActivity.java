@@ -8,6 +8,7 @@ import android.content.res.ColorStateList;
 import android.os.Bundle;
 
 import com.fxn.stash.Stash;
+import com.moutamid.secretservice.MainActivity;
 import com.moutamid.secretservice.R;
 import com.moutamid.secretservice.databinding.ActivityReplyBinding;
 import com.moutamid.secretservice.utilis.Constants;
@@ -38,8 +39,7 @@ public class ReplyActivity extends AppCompatActivity {
         communication_channel = Stash.getString(Constants.Communication_Channel, "").split(", ");
 
         if (!Constants.isNotificationServiceEnabled(ReplyActivity.this)){
-            Intent intent = new Intent("android.settings.ACTION_NOTIFICATION_LISTENER_SETTINGS");
-            startActivity(intent);
+            Constants.showNotificationDialog(ReplyActivity.this);
         }
 
         updateUI();

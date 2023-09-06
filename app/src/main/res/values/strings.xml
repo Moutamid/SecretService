@@ -1,4 +1,13 @@
 <resources>
     <string name="app_name">Secret Service</string>
+
+    <string name="sunday">Sunday</string>
+    <string name="monday">Monday</string>
+    <string name="tuesday">Tuesday</string>
+    <string name="wednesday">Wednesday</string>
+    <string name="thursday">Thursday</string>
+    <string name="friday">Friday</string>
+    <string name="saturday">Saturday</string>
+
     <string name="member_token">Your token is available on your member page on <font color="#ce3d96"><u>secret-service.be</u></font></string>
 </resources>

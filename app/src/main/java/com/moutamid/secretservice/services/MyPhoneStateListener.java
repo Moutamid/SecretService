@@ -18,7 +18,7 @@ import java.util.Calendar;
 
 public class MyPhoneStateListener extends PhoneStateListener {
     private Context context;
-    String TAG = "MissedCallReceiver";
+    String TAG = "MyPhoneStateListener";
 
     int lastState = TelephonyManager.CALL_STATE_IDLE;
     boolean isIncoming;
@@ -32,7 +32,7 @@ public class MyPhoneStateListener extends PhoneStateListener {
     public void onCallStateChanged(int state, String incomingNumber) {
         super.onCallStateChanged(state, incomingNumber);
 
-        if(lastState == state){
+        if (lastState == state) {
             //No change
             return;
         }
@@ -43,34 +43,32 @@ public class MyPhoneStateListener extends PhoneStateListener {
                 break;
             case TelephonyManager.CALL_STATE_OFFHOOK:
                 //Transition of ringing->offhook are pickups of incoming calls.  Nothing down on them
-                if(lastState != TelephonyManager.CALL_STATE_RINGING){
+                if (lastState != TelephonyManager.CALL_STATE_RINGING) {
                     isIncoming = false;
                     //outgoing call started
                 }
                 break;
             case TelephonyManager.CALL_STATE_IDLE:
                 //End of call(Idle).  The type depends on the previous state(s)
-                if(lastState == TelephonyManager.CALL_STATE_RINGING){
+                if (lastState == TelephonyManager.CALL_STATE_RINGING) {
                     //toast here for missed call
                     if (Stash.getBoolean(Constants.IS_ON)) {
-                        Toast.makeText(context, "Missed Call", Toast.LENGTH_SHORT).show();
                         Log.d(TAG, "isMissedCall");
-                        if (isWithinTimeWindow(incomingNumber, Constants.MISSED_CALLS)){
+                        if (isWithinTimeWindow(incomingNumber, Constants.MISSED_CALLS)) {
                             Log.d(TAG, "isWithinTimeWindow");
                             sendAutoMessage(incomingNumber, Stash.getString(Constants.MESSAGE, ""));
                         }
                     }
-                }
-                else if(isIncoming){
+                } else if (isIncoming) {
+                    /*
                     //incoming call ended
                     if (Stash.getBoolean(Constants.IS_ON)) {
                         if (isWithinTimeWindow(incomingNumber, Constants.REFUSED_CALLS)){
                             Log.d(TAG, "isWithinTimeWindow");
                             sendAutoMessage(incomingNumber, Stash.getString(Constants.MESSAGE, ""));
                         }
-                    }
-                }
-                else{
+                    } */
+                } else {
                     //outgoing call ended
                 }
                 break;
@@ -122,7 +120,7 @@ public class MyPhoneStateListener extends PhoneStateListener {
 
         Log.d(TAG, "startTimeHour   " + startTimeHour + "\t\tendTimeHour    " + endTimeHour);
 
-        if (Stash.getInt(Constants.TIME,  3) == 0) {
+        if (Stash.getInt(Constants.TIME, 3) == 0) {
             startTimeHour = Integer.parseInt(Constants.getFormattedHours(Stash.getLong(Constants.FROM_TIME, 0)));
             endTimeHour = Integer.parseInt(Constants.getFormattedHours(Stash.getLong(Constants.TO_TIME, 0)));
             isValid = currentHour >= startTimeHour && currentHour <= endTimeHour;
@@ -174,7 +172,7 @@ public class MyPhoneStateListener extends PhoneStateListener {
 
 
         ArrayList<ContactModel> list = Stash.getArrayList(Constants.EXCLUDE_CONTACTS, ContactModel.class);
-        for (ContactModel model : list){
+        for (ContactModel model : list) {
             if (model.getContactNumber().contains(phoneNumber)) {
                 return false;
             }
@@ -188,7 +186,7 @@ public class MyPhoneStateListener extends PhoneStateListener {
         }
         Log.d(TAG, "check   " + check);
         Log.d(TAG, "isValid   " + isValid);
-        if (!check){
+        if (!check) {
             return false;
         }
 
@@ -205,7 +203,7 @@ public class MyPhoneStateListener extends PhoneStateListener {
             Log.d(TAG, "SMS sent successfully");
         } catch (Exception e) {
             e.printStackTrace();
-            Log.d(TAG , "Missed Calll E \t " + e.getMessage());
+            Log.d(TAG, "Missed Calll E \t " + e.getMessage());
         }
     }
 

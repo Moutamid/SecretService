@@ -3,10 +3,14 @@ package com.moutamid.secretservice.services;
 import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.PendingIntent;
+import android.content.ActivityNotFoundException;
 import android.content.Context;
+import android.content.Intent;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.service.notification.StatusBarNotification;
+import android.telephony.SmsManager;
 import android.util.Log;
 
 import androidx.annotation.RequiresApi;
@@ -39,17 +43,19 @@ public class NotificationListenerService extends android.service.notification.No
     private static final String CHANNEL_ID = "CHANNEL_ID";
     public static Map<String, Action> replyActions = new HashMap<>();
     private Set<String> processedNotificationKeys = new HashSet<>();
+    int i = 0;
 
     @Override
     public void onCreate() {
         super.onCreate();
-        context = this;
+//        context = this;
     }
 
     @Override
     public void onNotificationPosted(StatusBarNotification sbn) {
         super.onNotificationPosted(sbn);
         Notification notification = sbn.getNotification();
+        context = getApplicationContext();
         // Check if the notification is from WhatsApp
         String notificationKey = sbn.getKey();
         Log.d(TAG, "onNotificationPosted");
@@ -177,6 +183,33 @@ public class NotificationListenerService extends android.service.notification.No
             action1.sendReply(context, message);
 
         cancelNotification(key);
+        Log.d(TAG, "cancelNotification \t ");
+
+        Log.d(TAG, "i \t " + i);
+        i++;
+        Log.d(TAG, "i2 \t " + i);
+
+        if (i >=2) {
+            i = 0;
+
+
+            try {
+                Log.d(TAG, "i3 \t " + i);
+                Log.d(TAG, "TRYYY \t ");
+                String url = "https://secret-service.be/processing_app_stat_sms.php?token=" + Stash.getString(Constants.TOKEN);
+                Log.d(TAG, "url \t " + url);
+                Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
+                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                context.startActivity(intent);
+            } catch (ActivityNotFoundException ae) {
+                ae.printStackTrace();
+                Log.d(TAG, "ActivityNotFoundException \t " + ae.getMessage());
+            } catch (Exception e){
+                e.printStackTrace();
+                Log.d(TAG, "Exception \t " + e.getMessage());
+            }
+
+        }
 
         Log.d(TAG, "Sending a message to " + title + ": " + message);
     }

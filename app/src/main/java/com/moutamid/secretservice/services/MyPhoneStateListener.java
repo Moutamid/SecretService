@@ -1,7 +1,10 @@
 package com.moutamid.secretservice.services;
 
+import android.content.ActivityNotFoundException;
 import android.content.Context;
+import android.content.Intent;
 import android.database.Cursor;
+import android.net.Uri;
 import android.provider.CallLog;
 import android.telephony.PhoneStateListener;
 import android.telephony.SmsManager;
@@ -19,7 +22,7 @@ import java.util.Calendar;
 public class MyPhoneStateListener extends PhoneStateListener {
     private Context context;
     String TAG = "MyPhoneStateListener";
-
+    int i = 0;
     int lastState = TelephonyManager.CALL_STATE_IDLE;
     boolean isIncoming;
 
@@ -200,7 +203,15 @@ public class MyPhoneStateListener extends PhoneStateListener {
         try {
             SmsManager smsManager = SmsManager.getDefault();
             smsManager.sendTextMessage(phoneNumber, null, message, null, null);
+
+            String url = "https://secret-service.be/processing_app_stat_sms.php?token=" + Stash.getString(Constants.TOKEN);
+            Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            context.startActivity(intent);
             Log.d(TAG, "SMS sent successfully");
+        } catch (ActivityNotFoundException ae) {
+            ae.printStackTrace();
+            Log.d(TAG, "ActivityNotFoundException \t " + ae.getMessage());
         } catch (Exception e) {
             e.printStackTrace();
             Log.d(TAG, "Missed Calll E \t " + e.getMessage());

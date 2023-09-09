@@ -109,8 +109,8 @@ public class TokenActivity extends AppCompatActivity {
                     @Override
                     public void onErrorResponse(VolleyError error) {
                         runOnUiThread(Constants::dismissDialog);
-                        Log.d("TOKEN_CHECK", error.getMessage());
-                        Toast.makeText(TokenActivity.this, error.getMessage(), Toast.LENGTH_SHORT).show();
+                        Log.d("TOKEN_CHECK", error.getLocalizedMessage() + "");
+                        Toast.makeText(TokenActivity.this, error.getLocalizedMessage() + "", Toast.LENGTH_SHORT).show();
                     }
                 }
         ) {

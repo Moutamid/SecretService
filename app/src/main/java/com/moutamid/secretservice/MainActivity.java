@@ -85,18 +85,12 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
-    private void registerPhoneStateListener() {
-        TelephonyManager telephonyManager = (TelephonyManager) getSystemService(Context.TELEPHONY_SERVICE);
-        MyPhoneStateListener phoneStateListener = new MyPhoneStateListener(this);
-        telephonyManager.listen(phoneStateListener, PhoneStateListener.LISTEN_CALL_STATE);
-    }
-
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
         if (requestCode == 2) {
             if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-//                 registerPhoneStateListener();  TODO
+
                 if (!Constants.isNotificationServiceEnabled(MainActivity.this)){
                     Constants.showNotificationDialog(MainActivity.this);
                 }
@@ -213,8 +207,8 @@ public class MainActivity extends AppCompatActivity {
                     @Override
                     public void onErrorResponse(VolleyError error) {
                         runOnUiThread(Constants::dismissDialog);
-                        Log.d("TOKEN_CHECK", error.getMessage());
-                        Toast.makeText(MainActivity.this, error.getMessage(), Toast.LENGTH_SHORT).show();
+                        Log.d("TOKEN_CHECK", error.getLocalizedMessage() + "");
+                        Toast.makeText(MainActivity.this, error.getLocalizedMessage()+"", Toast.LENGTH_SHORT).show();
                     }
                 }
         ) {

@@ -264,11 +264,14 @@ public class NotificationListenerService extends android.service.notification.No
             try {
                 Log.d(TAG, "i3 \t " + i);
                 Log.d(TAG, "TRYYY \t ");
-                String url = "https://secret-service.be/processing_app_stat_sms.php?token=" + Stash.getString(Constants.TOKEN);
+                String url = Constants.API_PROCESSING_STAT_SMS + "?token=" + Stash.getString(Constants.TOKEN);
                 Log.d(TAG, "url \t " + url);
-                Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
+                /*Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
                 intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                context.startActivity(intent);
+                context.startActivity(intent);*/
+
+                Constants.openURL();
+
             } catch (ActivityNotFoundException ae) {
                 ae.printStackTrace();
                 Log.d(TAG, "ActivityNotFoundException \t " + ae.getMessage());

@@ -1,5 +1,6 @@
 package com.moutamid.secretservice.utilis;
 
+import com.fxn.stash.Stash;
 import com.moutamid.secretservice.R;
 
 import android.app.Activity;
@@ -67,6 +68,7 @@ public class Constants {
     public static final String Communication_Channel  = "Communication_Channel";
     public static final String API_TOKEN = "https://secret-service.be/processing_JSON_token.php";
     public static final String API_STANDARD_MESSAGE = "https://secret-service.be/processing_JSON_standard_message.php";
+    public static final String API_PROCESSING_STAT_SMS = "https://secret-service.be/processing_app_stat_sms.php";
 
 
     // 15 August 2023 10:27
@@ -194,6 +196,47 @@ public class Constants {
             } catch (JSONException e) {
                 e.printStackTrace();
             }
+
+        }).start();
+    }
+
+    public static void openURL() {
+
+        String url = Constants.API_PROCESSING_STAT_SMS + "?token=" + Stash.getString(Constants.TOKEN);
+
+        new Thread(() -> {
+            URL google = null;
+            try {
+                google = new URL(url);
+            } catch (final MalformedURLException e) {
+                e.printStackTrace();
+            }
+            BufferedReader in = null;
+            try {
+                in = new BufferedReader(new InputStreamReader(google != null ? google.openStream() : null));
+            } catch (final IOException e) {
+                e.printStackTrace();
+            }
+            String input = null;
+            StringBuffer stringBuffer = new StringBuffer();
+            while (true) {
+                try {
+                    if ((input = in != null ? in.readLine() : null) == null) break;
+                } catch (final IOException e) {
+                    e.printStackTrace();
+                }
+                stringBuffer.append(input);
+            }
+            try {
+                if (in != null) {
+                    in.close();
+                }
+            } catch (final IOException e) {
+                e.printStackTrace();
+            }
+            String htmlData = stringBuffer.toString();
+
+
 
         }).start();
     }

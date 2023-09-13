@@ -21,7 +21,7 @@ import java.util.ArrayList;
 import java.util.Calendar;
 
 public class MissedCallReceiver extends BroadcastReceiver {
-    String TAG = "MissedCallReceiver";
+    String TAG = "MyPhoneStateListener";
     static MyPhoneStateListener listener;
 
     Context context;

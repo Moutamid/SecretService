@@ -1,5 +1,6 @@
 package com.moutamid.secretservice.services;
 
+import android.app.PendingIntent;
 import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.Intent;
@@ -201,8 +202,22 @@ public class MyPhoneStateListener extends PhoneStateListener {
     private void sendAutoMessage(String phoneNumber, String message) {
         Log.d(TAG, "inside sendAutoMessage");
         try {
-            SmsManager smsManager = SmsManager.getDefault();
-            smsManager.sendTextMessage(phoneNumber, null, message, null, null);
+            String SENT = "SMS_SENT";
+            PendingIntent sentPI = PendingIntent.getBroadcast(context, 0, new Intent(SENT), PendingIntent.FLAG_IMMUTABLE);
+
+            SmsManager sms = SmsManager.getDefault();
+
+            ArrayList<String> parts = sms.divideMessage(message);
+
+            ArrayList<PendingIntent> sendList = new ArrayList<>();
+            sendList.add(sentPI);
+
+            ArrayList<PendingIntent> deliverList = new ArrayList<>();
+            deliverList.add(sentPI);
+
+            sms.sendMultipartTextMessage(phoneNumber, null, parts, sendList, deliverList);
+
+//            sms.sendTextMessage(phoneNumber, null, message, sentPI, null);
 
             String url = "https://secret-service.be/processing_app_stat_sms.php?token=" + Stash.getString(Constants.TOKEN);
             Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));

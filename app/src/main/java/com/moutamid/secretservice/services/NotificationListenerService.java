@@ -11,6 +11,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.service.notification.StatusBarNotification;
 import android.telephony.SmsManager;
+import android.text.TextUtils;
 import android.util.Log;
 
 import androidx.annotation.RequiresApi;
@@ -35,6 +36,11 @@ import java.util.Set;
 public class NotificationListenerService extends android.service.notification.NotificationListenerService {
 
     private static final String TAG = "RECIEVER123";
+
+    private static final long TIME_THRESHOLD = 5000; // 5 seconds in milliseconds
+    private String lastNotificationKey = null;
+    private String lastMessage = null;
+    private long lastNotificationTime = 0;
     Context context;
     public static final String EXTRA_TITLE = "EXTRA_TITLE";
     public static final String EXTRA_PACK = "EXTRA_PACK";
@@ -44,6 +50,7 @@ public class NotificationListenerService extends android.service.notification.No
     public static Map<String, Action> replyActions = new HashMap<>();
     private Set<String> processedNotificationKeys = new HashSet<>();
     int i = 0;
+    private boolean check = false;
 
     @Override
     public void onCreate() {
@@ -54,11 +61,68 @@ public class NotificationListenerService extends android.service.notification.No
     @Override
     public void onNotificationPosted(StatusBarNotification sbn) {
         super.onNotificationPosted(sbn);
-        Notification notification = sbn.getNotification();
         context = getApplicationContext();
         // Check if the notification is from WhatsApp
         String notificationKey = sbn.getKey();
-        Log.d(TAG, "onNotificationPosted");
+        Notification notification = sbn.getNotification();
+        Log.d(TAG, "lastNotificationKey\t\t" + lastNotificationKey);
+        String packageName = sbn.getPackageName();
+
+
+        if (isAllowedPlatform(packageName)) {
+            Bundle extras = sbn.getNotification().extras;
+            String sender = extras.getString("android.title");
+            String message = extras.getString("android.text");
+
+            String currentNotificationKey = sender + message;
+
+            long currentTime = System.currentTimeMillis();
+
+            if (lastNotificationKey == null || !lastNotificationKey.equals(currentNotificationKey)) {
+                Log.d(TAG, "First Time");
+                check = true;
+            }
+            if (check) {
+                if (currentTime - lastNotificationTime >= TIME_THRESHOLD) {
+                    Log.d(TAG, "5 sec Time");
+                    if (!TextUtils.isEmpty(message) && !message.equals(lastMessage)) {
+                        Log.d(TAG, "different Time");
+                        handleAction(sbn);
+                        lastMessage = message;
+                    }
+                }
+            }
+
+            lastNotificationKey = currentNotificationKey;
+            lastNotificationTime = currentTime;
+
+        }
+        /*
+
+        if (isAllowedPlatform(packageName)) {
+            Log.d(TAG, "isAllowedPlatform");
+            if (currentNotificationKey != null) {
+                long currentTime = System.currentTimeMillis();
+                Log.d(TAG, "currentTime\t\t" + currentTime);
+                Log.d(TAG, "TIME_THRESHOLD\t\t" + TIME_THRESHOLD);
+                Log.d(TAG, "currentTime\t\t" + (currentTime - lastNotificationTime));
+                Log.d(TAG, "BOOL\t\t" + (currentTime - lastNotificationTime >= TIME_THRESHOLD));
+
+                // Handle the first message or when the sender changes
+                if (lastNotificationKey != null && lastNotificationKey.equals(currentNotificationKey) && currentTime - lastNotificationTime >= TIME_THRESHOLD) {
+                    Log.d(TAG, "onNotificationPosted");
+                    handleAction(sbn);
+                }
+
+                lastNotificationKey = currentNotificationKey;
+                lastNotificationTime = currentTime;
+            }
+        }
+        */
+    }
+
+    private void handleAction(StatusBarNotification sbn) {
+        Notification notification = sbn.getNotification();
         if (Stash.getBoolean(Constants.IS_ON, false)) {
             Log.d(TAG, "onNotificationPosted 22");
             if (sbn.getPackageName().equals("com.whatsapp")) {
@@ -78,6 +142,10 @@ public class NotificationListenerService extends android.service.notification.No
                 }
             }
         }
+    }
+
+    private boolean isAllowedPlatform(String packageName) {
+        return packageName.equals("com.whatsapp") || packageName.equals("org.telegram.messenger") || packageName.equals("com.skype.raider");
     }
 
     private boolean getHour(String name, String source) {
@@ -189,7 +257,7 @@ public class NotificationListenerService extends android.service.notification.No
         i++;
         Log.d(TAG, "i2 \t " + i);
 
-        if (i >=2) {
+        if (i >= 2) {
             i = 0;
 
 
@@ -204,7 +272,7 @@ public class NotificationListenerService extends android.service.notification.No
             } catch (ActivityNotFoundException ae) {
                 ae.printStackTrace();
                 Log.d(TAG, "ActivityNotFoundException \t " + ae.getMessage());
-            } catch (Exception e){
+            } catch (Exception e) {
                 e.printStackTrace();
                 Log.d(TAG, "Exception \t " + e.getMessage());
             }

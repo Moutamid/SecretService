@@ -124,9 +124,9 @@ public class MainActivity extends AppCompatActivity {
 
     private void enableViews() {
         if (Stash.getBoolean(Constants.IS_ON, false)) {
-            binding.onOff.setCardBackgroundColor(getResources().getColor(R.color.text_color));
-            binding.onOffICO.setImageTintList(ColorStateList.valueOf(getResources().getColor(R.color.bg_color)));
-            binding.onOffText.setTextColor(getResources().getColor(R.color.bg_color));
+            binding.onOff.setCardBackgroundColor(getResources().getColor(R.color.pink));
+            binding.onOffICO.setImageTintList(ColorStateList.valueOf(getResources().getColor(R.color.white)));
+            binding.onOffText.setTextColor(getResources().getColor(R.color.white));
         } else {
             binding.onOff.setCardBackgroundColor(getResources().getColor(R.color.bg_color_trans));
             binding.onOffICO.setImageTintList(ColorStateList.valueOf(getResources().getColor(R.color.white)));
@@ -142,22 +142,22 @@ public class MainActivity extends AppCompatActivity {
                         binding.onOffText.setTextColor(getResources().getColor(R.color.text_color));
                         Stash.put(Constants.IS_ON, false);
                     } else {
-                        binding.onOff.setCardBackgroundColor(getResources().getColor(R.color.text_color));
-                        binding.onOffICO.setImageTintList(ColorStateList.valueOf(getResources().getColor(R.color.bg_color)));
-                        binding.onOffText.setTextColor(getResources().getColor(R.color.bg_color));
+                        binding.onOff.setCardBackgroundColor(getResources().getColor(R.color.pink));
+                        binding.onOffICO.setImageTintList(ColorStateList.valueOf(getResources().getColor(R.color.white)));
+                        binding.onOffText.setTextColor(getResources().getColor(R.color.white));
                         Stash.put(Constants.IS_ON, true);
 
                         if (Stash.getString(Constants.UPDATED_TIME, "N/A").equals("N/A")) {
-                            Toast.makeText(this, "Please Update your message", Toast.LENGTH_SHORT).show();
+                            Toast.makeText(this, "Please UPDATE your message first", Toast.LENGTH_LONG).show();
                         }
 
                     }
 
                 } else {
-                    Toast.makeText(this, "Please activate time", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(this, "Activate SET TIME first", Toast.LENGTH_LONG).show();
                 }
             } else {
-                Toast.makeText(this, "Please add some Reply TO Channels", Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, "Select REPLY TO channels first", Toast.LENGTH_LONG).show();
             }
         });
         binding.timer.setOnClickListener(v -> {
@@ -193,13 +193,13 @@ public class MainActivity extends AppCompatActivity {
                                 String date = Constants.getFormattedDate(new Date().getTime());
                                 Stash.put(Constants.UPDATED_TIME, date);
                                 binding.time.setText(date);
-                                Toast.makeText(MainActivity.this, "Message Updated", Toast.LENGTH_SHORT).show();
+                                Toast.makeText(MainActivity.this, "Message Updated", Toast.LENGTH_LONG).show();
                             } else {
-                                Toast.makeText(MainActivity.this, "Message is empty", Toast.LENGTH_SHORT).show();
+                                Toast.makeText(MainActivity.this, "Message is empty", Toast.LENGTH_LONG).show();
                             }
                         } catch (JSONException e) {
                             e.printStackTrace();
-                            Toast.makeText(MainActivity.this, "Something went wrong!", Toast.LENGTH_SHORT).show();
+                            Toast.makeText(MainActivity.this, "Something went wrong!", Toast.LENGTH_LONG).show();
                         }
                     }
                 },
@@ -208,7 +208,7 @@ public class MainActivity extends AppCompatActivity {
                     public void onErrorResponse(VolleyError error) {
                         runOnUiThread(Constants::dismissDialog);
                         Log.d("TOKEN_CHECK", error.getLocalizedMessage() + "");
-                        Toast.makeText(MainActivity.this, error.getLocalizedMessage()+"", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(MainActivity.this, error.getLocalizedMessage()+"", Toast.LENGTH_LONG).show();
                     }
                 }
         ) {

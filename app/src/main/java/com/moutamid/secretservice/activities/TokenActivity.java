@@ -55,7 +55,7 @@ public class TokenActivity extends AppCompatActivity {
 
         binding.toolbar.back.setOnClickListener(v -> onBackPressed());
 
-        binding.link.setOnClickListener(v -> startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("http://secret-service.be/"))));
+        binding.link.setOnClickListener(v -> startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("https://secret-service.be/balance-sms.php"))));
 
         if (Stash.getBoolean(Constants.IS_TOKEN_VERIFY, false)) {
             binding.validated.setVisibility(View.VISIBLE);
@@ -94,14 +94,14 @@ public class TokenActivity extends AppCompatActivity {
                                 Stash.put(Constants.IS_TOKEN_VERIFY, true);
                                 binding.validated.setVisibility(View.VISIBLE);
                                 binding.notValidated.setVisibility(View.GONE);
-                                Toast.makeText(TokenActivity.this, "Token Updated", Toast.LENGTH_SHORT).show();
+                                Toast.makeText(TokenActivity.this, "Token Updated", Toast.LENGTH_LONG).show();
                             } else {
                                 Stash.put(Constants.IS_TOKEN_VERIFY, false);
-                                Toast.makeText(TokenActivity.this, "Token is not valid", Toast.LENGTH_SHORT).show();
+                                Toast.makeText(TokenActivity.this, "Token is not valid", Toast.LENGTH_LONG).show();
                             }
                         } catch (JSONException e) {
                             e.printStackTrace();
-                            Toast.makeText(TokenActivity.this, "Something went wrong!", Toast.LENGTH_SHORT).show();
+                            Toast.makeText(TokenActivity.this, "Something went wrong!", Toast.LENGTH_LONG).show();
                         }
                     }
                 },
@@ -110,7 +110,7 @@ public class TokenActivity extends AppCompatActivity {
                     public void onErrorResponse(VolleyError error) {
                         runOnUiThread(Constants::dismissDialog);
                         Log.d("TOKEN_CHECK", error.getLocalizedMessage() + "");
-                        Toast.makeText(TokenActivity.this, error.getLocalizedMessage() + "", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(TokenActivity.this, error.getLocalizedMessage() + "", Toast.LENGTH_LONG).show();
                     }
                 }
         ) {

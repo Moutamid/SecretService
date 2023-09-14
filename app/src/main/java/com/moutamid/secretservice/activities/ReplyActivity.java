@@ -100,6 +100,34 @@ public class ReplyActivity extends AppCompatActivity {
 
         });
 
+        binding.sms.setOnClickListener(v -> {
+            boolean check = false;
+            communication_channel = Stash.getString(Constants.Communication_Channel, "").split(", ");
+            for (String channel : communication_channel) {
+                if (channel.equals(Constants.SMS)) {
+                    check = true;
+                }
+            }
+
+            if (check){
+                binding.sms.setCardBackgroundColor(getResources().getColor(R.color.bg_color_trans));
+                binding.smsIcon.setImageTintList(ColorStateList.valueOf(getResources().getColor(R.color.white)));
+                binding.smsText.setTextColor(getResources().getColor(R.color.text_color));
+                String channels = Stash.getString(Constants.Communication_Channel, "");
+                String target = Constants.SMS + ", ";
+                channels = channels.replace(target, "");
+                Stash.put(Constants.Communication_Channel, channels);
+            } else {
+                binding.sms.setCardBackgroundColor(getResources().getColor(R.color.text_color));
+                binding.smsIcon.setImageTintList(ColorStateList.valueOf(getResources().getColor(R.color.bg_color)));
+                binding.smsText.setTextColor(getResources().getColor(R.color.bg_color));
+                String channels = Stash.getString(Constants.Communication_Channel, "");
+                channels += Constants.SMS + ", ";
+                Stash.put(Constants.Communication_Channel, channels);
+            }
+
+        });
+
         binding.whatsapp.setOnClickListener(v -> {
             boolean check = false;
             communication_channel = Stash.getString(Constants.Communication_Channel, "").split(", ");
@@ -212,6 +240,11 @@ public class ReplyActivity extends AppCompatActivity {
                 binding.refusedCall.setCardBackgroundColor(getResources().getColor(R.color.text_color));
                 binding.refusedIcon.setImageTintList(ColorStateList.valueOf(getResources().getColor(R.color.bg_color)));
                 binding.refusedText.setTextColor(getResources().getColor(R.color.bg_color));
+            }
+            if (channel.equals(Constants.SMS)) {
+                binding.sms.setCardBackgroundColor(getResources().getColor(R.color.text_color));
+                binding.smsIcon.setImageTintList(ColorStateList.valueOf(getResources().getColor(R.color.bg_color)));
+                binding.smsText.setTextColor(getResources().getColor(R.color.bg_color));
             }
         }
     }

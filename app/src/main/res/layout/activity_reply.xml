@@ -200,6 +200,7 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="5dp"
+                android:layout_marginEnd="5dp"
                 android:layout_weight="1"
                 app:cardBackgroundColor="@color/bg_color_trans"
                 app:cardCornerRadius="12dp"
@@ -227,13 +228,13 @@
                         android:layout_marginTop="10dp"
                         android:gravity="center"
                         android:textColor="@color/text_color"
-                        android:text="Refused call" />
+                        android:text="Refused Call" />
                 </LinearLayout>
 
             </com.google.android.material.card.MaterialCardView>
 
             <com.google.android.material.card.MaterialCardView
-                android:id="@+id/more"
+                android:id="@+id/sms"
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
                 android:layout_marginStart="5dp"
@@ -241,7 +242,6 @@
                 app:cardBackgroundColor="@color/bg_color_trans"
                 app:cardCornerRadius="12dp"
                 app:cardElevation="0dp"
-                android:visibility="gone"
                 app:strokeWidth="0dp">
 
                 <LinearLayout
@@ -252,19 +252,20 @@
                     android:padding="12dp">
 
                     <ImageView
+                        android:id="@+id/smsIcon"
                         android:layout_width="36dp"
                         android:layout_height="36dp"
-                        android:src="@drawable/round_more"
+                        android:src="@drawable/chat"
                         app:tint="@color/white" />
 
                     <TextView
+                        android:id="@+id/smsText"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="10dp"
                         android:gravity="center"
-                        android:visibility="gone"
                         android:textColor="@color/text_color"
-                        android:text="More" />
+                        android:text="SMS" />
                 </LinearLayout>
 
             </com.google.android.material.card.MaterialCardView>

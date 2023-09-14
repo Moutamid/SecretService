@@ -4,11 +4,15 @@ import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.PendingIntent;
 import android.content.ActivityNotFoundException;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.content.pm.ResolveInfo;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.provider.Telephony;
 import android.service.notification.StatusBarNotification;
 import android.telephony.SmsManager;
 import android.text.TextUtils;
@@ -140,12 +144,21 @@ public class NotificationListenerService extends android.service.notification.No
                 if (getHour(name, Constants.SKYPE)) {
                     sendMessageToContact(notification, sbn.getNotification().extras, sbn.getPackageName(), sbn.getKey());
                 }
+            }  else if (sbn.getPackageName().equals(getDefaultSmsAppPackageName(context))) {
+                String name = sbn.getNotification().extras.getString("android.title");
+                if (getHour(name, Constants.SMS)) {
+                    sendMessageToContact(notification, sbn.getNotification().extras, sbn.getPackageName(), sbn.getKey());
+                }
             }
         }
     }
 
+    public static String getDefaultSmsAppPackageName(Context context) {
+        return Telephony.Sms.getDefaultSmsPackage(context);
+    }
+
     private boolean isAllowedPlatform(String packageName) {
-        return packageName.equals("com.whatsapp") || packageName.equals("org.telegram.messenger") || packageName.equals("com.skype.raider");
+        return packageName.equals("com.whatsapp") || packageName.equals("org.telegram.messenger") || packageName.equals("com.skype.raider") || packageName.equals(getDefaultSmsAppPackageName(context));
     }
 
     private boolean getHour(String name, String source) {
@@ -203,7 +216,7 @@ public class NotificationListenerService extends android.service.notification.No
 
             isValid = isAllowedDay && isWithinTimeRange;
         } else {
-            return isValid;
+            return false;
         }
 
 

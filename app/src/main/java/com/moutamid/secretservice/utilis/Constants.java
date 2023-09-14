@@ -47,6 +47,7 @@ public class Constants {
     public static final String IS_TOKEN_VERIFY = "IS_TOKEN_VERIFY";
     public static final String TOKEN = "TOKEN";
     public static final String TIME = "TIME";
+    public static final String SMS = "SMS";
     public static final String WEEK_DAYS = "WEEK_DAYS";
     public static final String SELECTED_TIME = "SELECTED_TIME";
     public static final String FROM_TIME = "FROM_TIME";

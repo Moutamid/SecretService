@@ -96,7 +96,10 @@ public class TokenActivity extends AppCompatActivity {
                                 binding.notValidated.setVisibility(View.GONE);
                                 Toast.makeText(TokenActivity.this, "Token Updated", Toast.LENGTH_LONG).show();
                             } else {
+                                Stash.put(Constants.TOKEN, "");
                                 Stash.put(Constants.IS_TOKEN_VERIFY, false);
+                                binding.validated.setVisibility(View.GONE);
+                                binding.notValidated.setVisibility(View.VISIBLE);
                                 Toast.makeText(TokenActivity.this, "Token is not valid", Toast.LENGTH_LONG).show();
                             }
                         } catch (JSONException e) {

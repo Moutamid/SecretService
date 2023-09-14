@@ -102,24 +102,13 @@ public class MainActivity extends AppCompatActivity {
     protected void onResume() {
         super.onResume();
         Constants.initDialog(MainActivity.this);
-        if (Stash.getBoolean(Constants.IS_TOKEN_VERIFY, false)) {
-            enableViews();
-            binding.onOff.setClickable(true);
-            binding.timer.setClickable(true);
-            binding.update.setClickable(true);
-            binding.noContacts.setClickable(true);
-            binding.reply.setClickable(true);
-        } else {
+        if (!Stash.getBoolean(Constants.IS_TOKEN_VERIFY, false)) {
             binding.onOff.setCardBackgroundColor(getResources().getColor(R.color.bg_color_trans));
             binding.onOffICO.setImageTintList(ColorStateList.valueOf(getResources().getColor(R.color.white)));
             binding.onOffText.setTextColor(getResources().getColor(R.color.text_color));
             Stash.put(Constants.IS_ON, false);
-            binding.onOff.setClickable(false);
-            binding.timer.setClickable(false);
-            binding.update.setClickable(false);
-            binding.noContacts.setClickable(false);
-            binding.reply.setClickable(false);
         }
+        enableViews();
     }
 
     private void enableViews() {
@@ -134,44 +123,66 @@ public class MainActivity extends AppCompatActivity {
         }
 
         binding.onOff.setOnClickListener(v -> {
-            if (!Stash.getString(Constants.Communication_Channel, "").isEmpty()) {
-                if (Stash.getInt(Constants.TIME, 3) < 3){
-                    if (Stash.getBoolean(Constants.IS_ON, false)) {
-                        binding.onOff.setCardBackgroundColor(getResources().getColor(R.color.bg_color_trans));
-                        binding.onOffICO.setImageTintList(ColorStateList.valueOf(getResources().getColor(R.color.white)));
-                        binding.onOffText.setTextColor(getResources().getColor(R.color.text_color));
-                        Stash.put(Constants.IS_ON, false);
-                    } else {
-                        binding.onOff.setCardBackgroundColor(getResources().getColor(R.color.pink));
-                        binding.onOffICO.setImageTintList(ColorStateList.valueOf(getResources().getColor(R.color.white)));
-                        binding.onOffText.setTextColor(getResources().getColor(R.color.white));
-                        Stash.put(Constants.IS_ON, true);
+            if (Stash.getBoolean(Constants.IS_TOKEN_VERIFY, false)) {
+                if (!Stash.getString(Constants.Communication_Channel, "").isEmpty() || Stash.getBoolean(Constants.IS_ON, false)) {
+                    if (Stash.getInt(Constants.TIME, 3) < 3) {
+                        if (Stash.getBoolean(Constants.IS_ON, false)) {
+                            binding.onOff.setCardBackgroundColor(getResources().getColor(R.color.bg_color_trans));
+                            binding.onOffICO.setImageTintList(ColorStateList.valueOf(getResources().getColor(R.color.white)));
+                            binding.onOffText.setTextColor(getResources().getColor(R.color.text_color));
+                            Stash.put(Constants.IS_ON, false);
+                        } else {
+                            binding.onOff.setCardBackgroundColor(getResources().getColor(R.color.pink));
+                            binding.onOffICO.setImageTintList(ColorStateList.valueOf(getResources().getColor(R.color.white)));
+                            binding.onOffText.setTextColor(getResources().getColor(R.color.white));
+                            Stash.put(Constants.IS_ON, true);
 
-                        if (Stash.getString(Constants.UPDATED_TIME, "N/A").equals("N/A")) {
-                            Toast.makeText(this, "Please UPDATE your message first", Toast.LENGTH_LONG).show();
+                            if (Stash.getString(Constants.UPDATED_TIME, "N/A").equals("N/A")) {
+                                Toast.makeText(this, "Please UPDATE your message first", Toast.LENGTH_LONG).show();
+                            }
+
                         }
 
+                    } else {
+                        Toast.makeText(this, "Activate SET TIME first", Toast.LENGTH_LONG).show();
                     }
-
                 } else {
-                    Toast.makeText(this, "Activate SET TIME first", Toast.LENGTH_LONG).show();
+                    Toast.makeText(this, "Select REPLY TO channels first", Toast.LENGTH_LONG).show();
                 }
-            } else {
-                Toast.makeText(this, "Select REPLY TO channels first", Toast.LENGTH_LONG).show();
+            }else {
+                Toast.makeText(this, "Validate your TOKEN first", Toast.LENGTH_LONG).show();
             }
         });
         binding.timer.setOnClickListener(v -> {
-            startActivity(new Intent(this, SetTimerActivity.class));
+            if (Stash.getBoolean(Constants.IS_TOKEN_VERIFY, false)) {
+                startActivity(new Intent(this, SetTimerActivity.class));
+            }else {
+                Toast.makeText(this, "Validate your TOKEN first", Toast.LENGTH_LONG).show();
+            }
         });
         binding.update.setOnClickListener(v -> {
-            Constants.showDialog();
-            updateMessage();
+            if (Stash.getBoolean(Constants.IS_TOKEN_VERIFY, false)) {
+                Constants.showDialog();
+                updateMessage();
+            }else {
+                Toast.makeText(this, "Validate your TOKEN first", Toast.LENGTH_LONG).show();
+            }
+
         });
         binding.noContacts.setOnClickListener(v -> {
-            startActivity(new Intent(this, NoContactsActivity.class));
+            if (Stash.getBoolean(Constants.IS_TOKEN_VERIFY, false)) {
+                startActivity(new Intent(this, NoContactsActivity.class));
+            }else {
+                Toast.makeText(this, "Validate your TOKEN first", Toast.LENGTH_LONG).show();
+            }
         });
         binding.reply.setOnClickListener(v -> {
-            startActivity(new Intent(this, ReplyActivity.class));
+            if (Stash.getBoolean(Constants.IS_TOKEN_VERIFY, false)) {
+                startActivity(new Intent(this, ReplyActivity.class));
+            }else {
+                Toast.makeText(this, "Validate your TOKEN first", Toast.LENGTH_LONG).show();
+            }
+
         });
 
     }

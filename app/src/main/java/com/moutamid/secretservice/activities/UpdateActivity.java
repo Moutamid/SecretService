@@ -67,6 +67,7 @@ public class UpdateActivity extends AppCompatActivity {
                                 Stash.put(Constants.UPDATED_TIME, date);
                                 Toast.makeText(UpdateActivity.this, "Message Updated", Toast.LENGTH_LONG).show();
                             } else {
+                                Stash.put(Constants.MESSAGE, "");
                                 Toast.makeText(UpdateActivity.this, "Message is empty", Toast.LENGTH_LONG).show();
                             }
                         } catch (JSONException e) {

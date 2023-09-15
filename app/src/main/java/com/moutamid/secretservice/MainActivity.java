@@ -126,23 +126,21 @@ public class MainActivity extends AppCompatActivity {
             if (Stash.getBoolean(Constants.IS_TOKEN_VERIFY, false)) {
                 if (!Stash.getString(Constants.Communication_Channel, "").isEmpty() || Stash.getBoolean(Constants.IS_ON, false)) {
                     if (Stash.getInt(Constants.TIME, 3) < 3) {
-                        if (Stash.getBoolean(Constants.IS_ON, false)) {
-                            binding.onOff.setCardBackgroundColor(getResources().getColor(R.color.bg_color_trans));
-                            binding.onOffICO.setImageTintList(ColorStateList.valueOf(getResources().getColor(R.color.white)));
-                            binding.onOffText.setTextColor(getResources().getColor(R.color.text_color));
-                            Stash.put(Constants.IS_ON, false);
-                        } else {
-                            binding.onOff.setCardBackgroundColor(getResources().getColor(R.color.pink));
-                            binding.onOffICO.setImageTintList(ColorStateList.valueOf(getResources().getColor(R.color.white)));
-                            binding.onOffText.setTextColor(getResources().getColor(R.color.white));
-                            Stash.put(Constants.IS_ON, true);
-
-                            if (Stash.getString(Constants.UPDATED_TIME, "N/A").equals("N/A")) {
-                                Toast.makeText(this, "Please UPDATE your message first", Toast.LENGTH_LONG).show();
+                        if (!Stash.getString(Constants.MESSAGE, "").isEmpty()){
+                            if (Stash.getBoolean(Constants.IS_ON, false)) {
+                                binding.onOff.setCardBackgroundColor(getResources().getColor(R.color.bg_color_trans));
+                                binding.onOffICO.setImageTintList(ColorStateList.valueOf(getResources().getColor(R.color.white)));
+                                binding.onOffText.setTextColor(getResources().getColor(R.color.text_color));
+                                Stash.put(Constants.IS_ON, false);
+                            } else {
+                                binding.onOff.setCardBackgroundColor(getResources().getColor(R.color.pink));
+                                binding.onOffICO.setImageTintList(ColorStateList.valueOf(getResources().getColor(R.color.white)));
+                                binding.onOffText.setTextColor(getResources().getColor(R.color.white));
+                                Stash.put(Constants.IS_ON, true);
                             }
-
+                        } else {
+                            Toast.makeText(this, "Create an AUTO ANSWER message first", Toast.LENGTH_SHORT).show();
                         }
-
                     } else {
                         Toast.makeText(this, "Activate SET TIME first", Toast.LENGTH_LONG).show();
                     }

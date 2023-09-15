@@ -34,6 +34,7 @@ import com.moutamid.secretservice.activities.NoContactsActivity;
 import com.moutamid.secretservice.activities.ReplyActivity;
 import com.moutamid.secretservice.activities.SetTimerActivity;
 import com.moutamid.secretservice.activities.TokenActivity;
+import com.moutamid.secretservice.activities.UpdateActivity;
 import com.moutamid.secretservice.databinding.ActivityMainBinding;
 import com.moutamid.secretservice.services.MyPhoneStateListener;
 import com.moutamid.secretservice.utilis.Constants;
@@ -48,7 +49,6 @@ import java.util.Map;
 
 public class MainActivity extends AppCompatActivity {
     ActivityMainBinding binding;
-    RequestQueue requestQueue;
     String[] permissions = new String[] {
             Manifest.permission.READ_CONTACTS,
             Manifest.permission.SEND_SMS,
@@ -62,8 +62,8 @@ public class MainActivity extends AppCompatActivity {
         setContentView(binding.getRoot());
         Constants.checkApp(this);
 
-        String time = Stash.getString(Constants.UPDATED_TIME, "N/A");
-        binding.time.setText(time);
+/*        String time = Stash.getString(Constants.UPDATED_TIME, "N/A");
+        binding.time.setText(time);*/
 
         if (    ContextCompat.checkSelfPermission(MainActivity.this, android.Manifest.permission.READ_CONTACTS) != PackageManager.PERMISSION_GRANTED ||
                 ContextCompat.checkSelfPermission(MainActivity.this, android.Manifest.permission.READ_CALL_LOG) != PackageManager.PERMISSION_GRANTED ||
@@ -81,7 +81,7 @@ public class MainActivity extends AppCompatActivity {
             startActivity(new Intent(this, TokenActivity.class));
         });
 
-        requestQueue = VolleySingleton.getInstance(MainActivity.this).getRequestQueue();
+
 
     }
 
@@ -162,8 +162,7 @@ public class MainActivity extends AppCompatActivity {
         });
         binding.update.setOnClickListener(v -> {
             if (Stash.getBoolean(Constants.IS_TOKEN_VERIFY, false)) {
-                Constants.showDialog();
-                updateMessage();
+                startActivity(new Intent(this, UpdateActivity.class));
             }else {
                 Toast.makeText(this, "Validate your TOKEN first", Toast.LENGTH_LONG).show();
             }
@@ -187,50 +186,6 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
-    private void updateMessage() {
 
-        StringRequest stringRequest = new StringRequest(Request.Method.POST, Constants.API_STANDARD_MESSAGE,
-                new Response.Listener<String>() {
-                    @Override
-                    public void onResponse(String response) {
-                        runOnUiThread(Constants::dismissDialog);
-                        Log.d("TOKEN_CHECK", response.toString());
-                        try {
-                            JSONObject obj = new JSONObject(response);
-                            String msg = obj.getString("msg");
-                            Log.d("TOKEN_CHECK", msg);
-                            if (!msg.isEmpty()) {
-                                Stash.put(Constants.MESSAGE, msg);
-                                String date = Constants.getFormattedDate(new Date().getTime());
-                                Stash.put(Constants.UPDATED_TIME, date);
-                                binding.time.setText(date);
-                                Toast.makeText(MainActivity.this, "Message Updated", Toast.LENGTH_LONG).show();
-                            } else {
-                                Toast.makeText(MainActivity.this, "Message is empty", Toast.LENGTH_LONG).show();
-                            }
-                        } catch (JSONException e) {
-                            e.printStackTrace();
-                            Toast.makeText(MainActivity.this, "Something went wrong!", Toast.LENGTH_LONG).show();
-                        }
-                    }
-                },
-                new Response.ErrorListener() {
-                    @Override
-                    public void onErrorResponse(VolleyError error) {
-                        runOnUiThread(Constants::dismissDialog);
-                        Log.d("TOKEN_CHECK", error.getLocalizedMessage() + "");
-                        Toast.makeText(MainActivity.this, error.getLocalizedMessage()+"", Toast.LENGTH_LONG).show();
-                    }
-                }
-        ) {
-            @Override
-            protected Map<String, String> getParams() {
-                Map<String, String> params = new HashMap<>();
-                params.put("token", Stash.getString(Constants.TOKEN));
-                return params;
-            }
-        };
-        requestQueue.add(stringRequest);
-    }
 
 }

@@ -11,11 +11,8 @@
     <uses-permission android:name="android.permission.READ_CONTACTS" />
     <uses-permission android:name="android.permission.SEND_SMS" />
     <uses-permission android:name="android.permission.READ_CALL_LOG" />
-    <uses-permission android:name="android.permission.READ_PHONE_STATE" />
-<!--    <uses-permission android:name="android.permission.READ_PRIVILEGED_PHONE_STATE" />-->
+    <uses-permission android:name="android.permission.READ_PHONE_STATE" /> <!-- <uses-permission android:name="android.permission.READ_PRIVILEGED_PHONE_STATE" /> -->
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
-<!--    <uses-permission android:name="android.permission.BIND_NOTIFICATION_LISTENER_SERVICE" />-->
-
 
     <application
         android:name=".MyApplication"
@@ -28,6 +25,9 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.SecretService"
         tools:targetApi="31">
+        <activity
+            android:name=".activities.UpdateActivity"
+            android:exported="false" />
         <activity
             android:name=".activities.NoContactsActivity"
             android:exported="false" />
@@ -67,7 +67,6 @@
                 <action android:name="android.intent.action.PHONE_STATE" />
             </intent-filter>
         </receiver>
-
         <receiver
             android:name=".receivers.RestartBootReceiver"
             android:enabled="true"
@@ -85,15 +84,13 @@
 
         <service
             android:name=".services.NotificationListenerService"
+            android:exported="true"
             android:label="Whatsapp Notification Listener"
-            android:permission="android.permission.BIND_NOTIFICATION_LISTENER_SERVICE"
-            android:exported="true">
+            android:permission="android.permission.BIND_NOTIFICATION_LISTENER_SERVICE">
             <intent-filter>
                 <action android:name="android.service.notification.NotificationListenerService" />
             </intent-filter>
         </service>
-
-
     </application>
 
 </manifest>

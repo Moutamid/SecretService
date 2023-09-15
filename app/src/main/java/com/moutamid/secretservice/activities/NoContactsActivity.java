@@ -22,6 +22,7 @@ import com.moutamid.secretservice.adapters.ContactsAdapter;
 import com.moutamid.secretservice.databinding.ActivityNoContactsBinding;
 import com.moutamid.secretservice.models.ContactModel;
 import com.moutamid.secretservice.utilis.Constants;
+import com.moutamid.secretservice.utilis.ContactManager;
 
 import java.util.ArrayList;
 
@@ -29,6 +30,7 @@ public class NoContactsActivity extends AppCompatActivity {
     ActivityNoContactsBinding binding;
     public final int PICK_CONTACT_REQUEST = 1;
     ContactsAdapter adapter;
+    ArrayList<ContactModel> list = new ArrayList<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -37,22 +39,38 @@ public class NoContactsActivity extends AppCompatActivity {
         setContentView(binding.getRoot());
 
         binding.toolbar.back.setOnClickListener(v -> onBackPressed());
+        list = Stash.getArrayList(Constants.EXCLUDE_CONTACTS, ContactModel.class);
+
 
         binding.addContact.setOnClickListener(v -> {
-                    if (ContextCompat.checkSelfPermission(NoContactsActivity.this, Manifest.permission.READ_CONTACTS) != PackageManager.PERMISSION_GRANTED) {
-                        shouldShowRequestPermissionRationale(Manifest.permission.READ_CONTACTS);
-                        ActivityCompat.requestPermissions(NoContactsActivity.this, new String[]{Manifest.permission.READ_CONTACTS}, 2);
-                    } else {
-                        Intent pickContact = new Intent(Intent.ACTION_PICK, ContactsContract.Contacts.CONTENT_URI);
-                        pickContact.setType(ContactsContract.CommonDataKinds.Phone.CONTENT_TYPE);
-                        startActivityForResult(pickContact, PICK_CONTACT_REQUEST);
-                    }
-                });
+            if (ContextCompat.checkSelfPermission(NoContactsActivity.this, Manifest.permission.READ_CONTACTS) != PackageManager.PERMISSION_GRANTED) {
+                shouldShowRequestPermissionRationale(Manifest.permission.READ_CONTACTS);
+                ActivityCompat.requestPermissions(NoContactsActivity.this, new String[]{Manifest.permission.READ_CONTACTS}, 2);
+            } else {
+                Intent pickContact = new Intent(Intent.ACTION_PICK, ContactsContract.Contacts.CONTENT_URI);
+                pickContact.setType(ContactsContract.CommonDataKinds.Phone.CONTENT_TYPE);
+                startActivityForResult(pickContact, PICK_CONTACT_REQUEST);
+            }
+        });
+
+        binding.delete.setOnClickListener(v -> {
+            list.clear();
+            adapter.notifyDataSetChanged();
+            Stash.put(Constants.EXCLUDE_CONTACTS, list);
+        });
+
+        binding.selectAll.setOnClickListener(v -> {
+            list.clear();
+            list = ContactManager.getAllContacts(this);
+            adapter = new ContactsAdapter(this, list);
+            Log.d("CHECK123", "SIZE " + list.size());
+            binding.contactRc.setAdapter(adapter);
+            Stash.put(Constants.EXCLUDE_CONTACTS, list);
+        });
 
         binding.contactRc.setLayoutManager(new LinearLayoutManager(this));
         binding.contactRc.setHasFixedSize(false);
 
-        ArrayList<ContactModel> list = Stash.getArrayList(Constants.EXCLUDE_CONTACTS, ContactModel.class);
         adapter = new ContactsAdapter(this, list);
         Log.d("CHECK123", "SIZE " + list.size());
         binding.contactRc.setAdapter(adapter);
@@ -61,7 +79,7 @@ public class NoContactsActivity extends AppCompatActivity {
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-        if (requestCode == 2){
+        if (requestCode == 2) {
             if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                 Intent pickContact = new Intent(Intent.ACTION_PICK, ContactsContract.Contacts.CONTENT_URI);
                 pickContact.setType(ContactsContract.CommonDataKinds.Phone.CONTENT_TYPE);
@@ -86,7 +104,7 @@ public class NoContactsActivity extends AppCompatActivity {
                         int phoneIndex = cursor.getColumnIndex(ContactsContract.CommonDataKinds.Phone.NUMBER);
                         String contactName = cursor.getString(nameIndex);
                         String contactNumber = cursor.getString(phoneIndex);
-                        ArrayList<ContactModel> list = Stash.getArrayList(Constants.EXCLUDE_CONTACTS, ContactModel.class);
+                        list = Stash.getArrayList(Constants.EXCLUDE_CONTACTS, ContactModel.class);
                         list.add(new ContactModel(contactName, contactNumber));
                         Log.d("CHECK123", "SIZE " + list.size());
                         Stash.put(Constants.EXCLUDE_CONTACTS, list);

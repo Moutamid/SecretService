@@ -53,7 +53,9 @@ public class MainActivity extends AppCompatActivity {
             Manifest.permission.READ_CONTACTS,
             Manifest.permission.SEND_SMS,
             Manifest.permission.READ_PHONE_STATE,
-            Manifest.permission.READ_CALL_LOG
+            Manifest.permission.READ_CALL_LOG,
+            Manifest.permission.READ_SMS,
+            Manifest.permission.RECEIVE_SMS,
     };
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -68,11 +70,15 @@ public class MainActivity extends AppCompatActivity {
         if (    ContextCompat.checkSelfPermission(MainActivity.this, android.Manifest.permission.READ_CONTACTS) != PackageManager.PERMISSION_GRANTED ||
                 ContextCompat.checkSelfPermission(MainActivity.this, android.Manifest.permission.READ_CALL_LOG) != PackageManager.PERMISSION_GRANTED ||
                 ContextCompat.checkSelfPermission(MainActivity.this, android.Manifest.permission.READ_PHONE_STATE) != PackageManager.PERMISSION_GRANTED ||
+                ContextCompat.checkSelfPermission(MainActivity.this, android.Manifest.permission.RECEIVE_SMS) != PackageManager.PERMISSION_GRANTED ||
+                ContextCompat.checkSelfPermission(MainActivity.this, android.Manifest.permission.READ_SMS) != PackageManager.PERMISSION_GRANTED ||
                 ContextCompat.checkSelfPermission(MainActivity.this, android.Manifest.permission.SEND_SMS) != PackageManager.PERMISSION_GRANTED )
         {
             shouldShowRequestPermissionRationale(android.Manifest.permission.READ_CONTACTS);
             shouldShowRequestPermissionRationale(android.Manifest.permission.SEND_SMS);
             shouldShowRequestPermissionRationale(android.Manifest.permission.READ_CALL_LOG);
+            shouldShowRequestPermissionRationale(android.Manifest.permission.READ_SMS);
+            shouldShowRequestPermissionRationale(android.Manifest.permission.RECEIVE_SMS);
             shouldShowRequestPermissionRationale(android.Manifest.permission.READ_PHONE_STATE);
             ActivityCompat.requestPermissions(MainActivity.this, permissions, 2);
         }

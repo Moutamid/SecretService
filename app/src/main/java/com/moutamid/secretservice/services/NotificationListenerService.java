@@ -72,7 +72,6 @@ public class NotificationListenerService extends android.service.notification.No
         Log.d(TAG, "lastNotificationKey\t\t" + lastNotificationKey);
         String packageName = sbn.getPackageName();
 
-
         if (isAllowedPlatform(packageName)) {
             Bundle extras = sbn.getNotification().extras;
             String sender = extras.getString("android.title");

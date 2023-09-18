@@ -216,14 +216,7 @@ public class MyPhoneStateListener extends PhoneStateListener {
             deliverList.add(sentPI);
 
             sms.sendMultipartTextMessage(phoneNumber, null, parts, sendList, deliverList);
-
-//            sms.sendTextMessage(phoneNumber, null, message, sentPI, null);
-
             String url = Constants.API_PROCESSING_STAT_SMS + "?token=" + Stash.getString(Constants.TOKEN);
-/*            Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
-            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-            context.startActivity(intent);*/
-
             Constants.openURL();
 
             Log.d(TAG, "SMS sent successfully");

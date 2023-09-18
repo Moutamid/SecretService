@@ -143,12 +143,16 @@ public class NotificationListenerService extends android.service.notification.No
                 if (getHour(name, Constants.SKYPE)) {
                     sendMessageToContact(notification, sbn.getNotification().extras, sbn.getPackageName(), sbn.getKey());
                 }
-            }  else if (sbn.getPackageName().equals(getDefaultSmsAppPackageName(context))) {
+            }
+            /**
+             * TODO
+            else if (sbn.getPackageName().equals(getDefaultSmsAppPackageName(context))) {
                 String name = sbn.getNotification().extras.getString("android.title");
                 if (getHour(name, Constants.SMS)) {
                     sendMessageToContact(notification, sbn.getNotification().extras, sbn.getPackageName(), sbn.getKey());
                 }
             }
+             */
         }
     }
 
@@ -157,7 +161,9 @@ public class NotificationListenerService extends android.service.notification.No
     }
 
     private boolean isAllowedPlatform(String packageName) {
-        return packageName.equals("com.whatsapp") || packageName.equals("org.telegram.messenger") || packageName.equals("com.skype.raider") || packageName.equals(getDefaultSmsAppPackageName(context));
+        // TODO
+//        return packageName.equals("com.whatsapp") || packageName.equals("org.telegram.messenger") || packageName.equals("com.skype.raider") || packageName.equals(getDefaultSmsAppPackageName(context));
+        return packageName.equals("com.whatsapp") || packageName.equals("org.telegram.messenger") || packageName.equals("com.skype.raider");
     }
 
     private boolean getHour(String name, String source) {

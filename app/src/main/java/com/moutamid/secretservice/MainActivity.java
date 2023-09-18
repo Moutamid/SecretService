@@ -7,6 +7,7 @@ import androidx.core.content.ContextCompat;
 
 import android.Manifest;
 import android.app.Dialog;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -37,6 +38,7 @@ import com.moutamid.secretservice.activities.TokenActivity;
 import com.moutamid.secretservice.activities.UpdateActivity;
 import com.moutamid.secretservice.databinding.ActivityMainBinding;
 import com.moutamid.secretservice.services.MyPhoneStateListener;
+import com.moutamid.secretservice.services.NotificationListenerService;
 import com.moutamid.secretservice.utilis.Constants;
 import com.moutamid.secretservice.utilis.VolleySingleton;
 
@@ -96,7 +98,6 @@ public class MainActivity extends AppCompatActivity {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
         if (requestCode == 2) {
             if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-
                 if (!Constants.isNotificationServiceEnabled(MainActivity.this)){
                     Constants.showNotificationDialog(MainActivity.this);
                 }

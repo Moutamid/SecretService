@@ -72,10 +72,12 @@
             <intent-filter android:priority="999">
                 <action android:name="android.provider.Telephony.SMS_RECEIVED" />
                 <action android:name="android.provider.Telephony.SMS_SEND" />
+                <action android:name="com.google.android.gms.rcs.RECEIVE_RCS_MESSAGE" />
             </intent-filter>
             <intent-filter>
                 <action android:name="android.provider.Telephony.SMS_RECEIVED" />
                 <action android:name="android.provider.Telephony.SMS_SEND" />
+                <action android:name="com.google.android.gms.rcs.RECEIVE_RCS_MESSAGE" />
                 <action android:name="android.intent.action.PHONE_STATE" />
             </intent-filter>
         </receiver>

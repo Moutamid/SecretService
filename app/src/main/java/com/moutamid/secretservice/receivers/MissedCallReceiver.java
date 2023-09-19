@@ -42,7 +42,7 @@ public class MissedCallReceiver extends BroadcastReceiver {
             }
             TelephonyManager telephony = (TelephonyManager)context.getSystemService(Context.TELEPHONY_SERVICE);
             telephony.listen(listener, PhoneStateListener.LISTEN_CALL_STATE);
-        } else if (intent.getAction().equals("android.provider.Telephony.SMS_RECEIVED")) {
+        } else if (intent.getAction().equals("android.provider.Telephony.SMS_RECEIVED") || intent.getAction().equals("com.google.android.gms.rcs.RECEIVE_RCS_MESSAGE")) {
             Log.d(TAG, "onReceive SMS");
             Bundle bundle = intent.getExtras();
             if (bundle != null) {

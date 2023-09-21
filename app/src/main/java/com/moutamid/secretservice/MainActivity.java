@@ -31,6 +31,7 @@ import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.StringRequest;
 import com.fxn.stash.Stash;
+import com.moutamid.secretservice.activities.AngelsListActivity;
 import com.moutamid.secretservice.activities.NoContactsActivity;
 import com.moutamid.secretservice.activities.ReplyActivity;
 import com.moutamid.secretservice.activities.SetTimerActivity;
@@ -186,7 +187,13 @@ public class MainActivity extends AppCompatActivity {
             }else {
                 Toast.makeText(this, "Validate your TOKEN first", Toast.LENGTH_LONG).show();
             }
-
+        });
+        binding.angels.setOnClickListener(v -> {
+            if (Stash.getBoolean(Constants.IS_TOKEN_VERIFY, false)) {
+                startActivity(new Intent(this, AngelsListActivity.class));
+            }else {
+                Toast.makeText(this, "Validate your TOKEN first", Toast.LENGTH_LONG).show();
+            }
         });
 
     }

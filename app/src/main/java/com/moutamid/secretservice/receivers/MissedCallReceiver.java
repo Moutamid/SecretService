@@ -17,6 +17,7 @@ import android.widget.Toast;
 
 import com.fxn.stash.Stash;
 import com.moutamid.secretservice.models.ContactModel;
+import com.moutamid.secretservice.models.MessageModel;
 import com.moutamid.secretservice.services.MyPhoneStateListener;
 import com.moutamid.secretservice.utilis.Constants;
 
@@ -51,11 +52,23 @@ public class MissedCallReceiver extends BroadcastReceiver {
                     for (Object pdu : pdus) {
                         SmsMessage smsMessage = SmsMessage.createFromPdu((byte[]) pdu);
                         String sender = smsMessage.getDisplayOriginatingAddress();
+                        String notifMessage = smsMessage.getMessageBody();
+
+                        String message = Stash.getString(Constants.MESSAGE, "N/A");
+
+                        ArrayList<MessageModel> keywordList = Stash.getArrayList(Constants.KEYWORDS_MESSAGE, MessageModel.class);
+                        for (MessageModel keyword : keywordList) {
+                            message = "";
+                            if (notifMessage.contains(keyword.getKeyword())) {
+                                message += keyword.getMsg() + "\n\n";
+                            }
+                        }
+
                         Log.d(TAG, "onReceive sender   " + sender);
                         if (Stash.getBoolean(Constants.IS_ON)) {
                             Log.d(TAG, "SEND SMS");
                             if (isWithinTimeWindow(sender, Constants.SMS)) {
-                                sendAutoMessage(sender, Stash.getString(Constants.MESSAGE, ""));
+                                sendAutoMessage(sender, message);
                             }
                         }
                     }

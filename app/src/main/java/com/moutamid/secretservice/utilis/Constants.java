@@ -44,6 +44,7 @@ public class Constants {
     public static final String DAY_FORMAT = "dd/MM/yyyy";
     public static final String TIME_FORMAT = "HH:mm";
     public static final String IS_ON = "IS_ON";
+    public static final String IS_ALERT_ON = "IS_ALERT_ON";
     public static final String IS_TOKEN_VERIFY = "IS_TOKEN_VERIFY";
     public static final String TOKEN = "TOKEN";
     public static final String TIME = "TIME";
@@ -66,10 +67,12 @@ public class Constants {
     public static final String EXCLUDE_CONTACTS = "EXCLUDE_CONTACTS";
     public static final String UPDATED_TIME = "UPDATED_TIME";
     public static final String MESSAGE = "MESSAGE";
+    public static final String KEYWORDS_MESSAGE = "KEYWORDS_MESSAGE";
     public static final String Communication_Channel  = "Communication_Channel";
     public static final String API_TOKEN = "https://secret-service.be/processing_JSON_token.php";
     public static final String API_STANDARD_MESSAGE = "https://secret-service.be/processing_JSON_standard_message.php";
     public static final String API_PROCESSING_STAT_SMS = "https://secret-service.be/processing_app_stat_sms.php";
+    public static final String API_KEYWORD_MESSAGE = "https://secret-service.be/processing_JSON_app_keyword.php";
 
 
     // 15 August 2023 10:27

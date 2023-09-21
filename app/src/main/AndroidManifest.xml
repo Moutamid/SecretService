@@ -16,11 +16,11 @@
     <uses-permission android:name="android.permission.READ_PHONE_STATE" /> <!-- <uses-permission android:name="android.permission.READ_PRIVILEGED_PHONE_STATE" /> -->
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
 
-
     <queries>
         <package android:name="com.whatsapp" />
         <package android:name="org.telegram.messenger" />
         <package android:name="com.skype.raider" />
+
         <intent>
             <action android:name="Telephony.Sms.Intents.SMS_DELIVER_ACTION" />
         </intent>
@@ -37,6 +37,9 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.SecretService"
         tools:targetApi="31">
+        <activity
+            android:name=".activities.AngelsListActivity"
+            android:exported="false" />
         <activity
             android:name=".activities.UpdateActivity"
             android:exported="false" />

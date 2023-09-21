@@ -24,6 +24,7 @@ import androidx.core.app.RemoteInput;
 
 import com.fxn.stash.Stash;
 import com.moutamid.secretservice.models.ContactModel;
+import com.moutamid.secretservice.models.MessageModel;
 import com.moutamid.secretservice.utilis.Action;
 import com.moutamid.secretservice.utilis.Constants;
 import com.moutamid.secretservice.utilis.NotificationUtils;
@@ -254,7 +255,20 @@ public class NotificationListenerService extends android.service.notification.No
     private void sendMessageToContact(Notification notification, Bundle extras, String pack, String key) {
 
         String title = extras.getString("android.title");
+        String notifMessage = extras.getString("android.text");
         String message = Stash.getString(Constants.MESSAGE, "N/A");
+
+        if (notifMessage == null){
+            notifMessage = "";
+        }
+
+        ArrayList<MessageModel> keywordList = Stash.getArrayList(Constants.KEYWORDS_MESSAGE, MessageModel.class);
+        for (MessageModel keyword : keywordList) {
+            message = "";
+            if (notifMessage.contains(keyword.getKeyword())) {
+                message += keyword.getMsg() + "\n\n";
+            }
+        }
 
         Action action = NotificationUtils.getQuickReplyAction(notification, "com.moutamid.secretservice"); //Issue
         if (action != null && replyActions != null)

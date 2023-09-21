@@ -1,11 +1,14 @@
 package com.moutamid.secretservice;
 
+import static com.android.volley.VolleyLog.TAG;
+
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 
 import android.Manifest;
+import android.app.ActivityManager;
 import android.app.Dialog;
 import android.content.ComponentName;
 import android.content.Context;
@@ -13,9 +16,13 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.res.ColorStateList;
 import android.graphics.drawable.ColorDrawable;
+import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.PowerManager;
 import android.provider.ContactsContract;
+import android.provider.Settings;
 import android.telephony.PhoneStateListener;
 import android.telephony.SmsManager;
 import android.telephony.TelephonyManager;
@@ -39,6 +46,7 @@ import com.moutamid.secretservice.activities.TokenActivity;
 import com.moutamid.secretservice.activities.UpdateActivity;
 import com.moutamid.secretservice.databinding.ActivityMainBinding;
 import com.moutamid.secretservice.services.MyPhoneStateListener;
+import com.moutamid.secretservice.services.MyService;
 import com.moutamid.secretservice.services.NotificationListenerService;
 import com.moutamid.secretservice.utilis.Constants;
 import com.moutamid.secretservice.utilis.VolleySingleton;
@@ -52,6 +60,9 @@ import java.util.Map;
 
 public class MainActivity extends AppCompatActivity {
     ActivityMainBinding binding;
+
+    MyService mYourService;
+
     String[] permissions = new String[] {
             Manifest.permission.READ_CONTACTS,
             Manifest.permission.SEND_SMS,
@@ -66,6 +77,10 @@ public class MainActivity extends AppCompatActivity {
         binding = ActivityMainBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
         Constants.checkApp(this);
+
+        startInitService();
+
+        askToDisableDozeMode();
 
 /*        String time = Stash.getString(Constants.UPDATED_TIME, "N/A");
         binding.time.setText(time);*/
@@ -198,6 +213,45 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
+    private void askToDisableDozeMode() {
+        try {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                Log.d(TAG, "askToDisableDozeMode: ");
+                Intent intent = new Intent();
+                String packageName = getPackageName();
+                PowerManager pm = (PowerManager) getSystemService(POWER_SERVICE);
+                if (!pm.isIgnoringBatteryOptimizations(packageName)) {
+                    intent.setAction(Settings.ACTION_IGNORE_BATTERY_OPTIMIZATION_SETTINGS);
+//                intent.setAction(Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS);
+                    intent.setData(Uri.parse("package:" + packageName));
+                    startActivity(intent);
+                } else {
+                    Toast.makeText(MainActivity.this, "Doze mode is active", Toast.LENGTH_SHORT).show();
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
 
+    private void startInitService() {
+        mYourService = new MyService();
+        Intent mServiceIntent = new Intent(this, mYourService.getClass());
+        if (!isMyServiceRunning(mYourService.getClass())) {
+            startService(mServiceIntent);
+        }
+    }
+
+    private boolean isMyServiceRunning(Class<?> serviceClass) {
+        ActivityManager manager = (ActivityManager) getSystemService(Context.ACTIVITY_SERVICE);
+        for (ActivityManager.RunningServiceInfo service : manager.getRunningServices(Integer.MAX_VALUE)) {
+            if (serviceClass.getName().equals(service.service.getClassName())) {
+                Log.i("Service status", "Running");
+                return true;
+            }
+        }
+        Log.i("Service status", "Not running");
+        return false;
+    }
 
 }

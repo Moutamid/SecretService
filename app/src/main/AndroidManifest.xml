@@ -17,6 +17,9 @@
     <uses-permission android:name="android.permission.READ_PHONE_STATE" /> <!-- <uses-permission android:name="android.permission.READ_PRIVILEGED_PHONE_STATE" /> -->
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
     <uses-permission android:name="android.permission.ACTION_IGNORE_BATTERY_OPTIMIZATION_SETTINGS" />
+    <uses-permission android:name="android.permission.RECORD_AUDIO" />
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
+
 
     <queries>
         <package android:name="com.whatsapp" />
@@ -98,6 +101,11 @@
 
         <service
             android:name=".services.MyService"
+            android:enabled="true"
+            android:exported="true" />
+
+        <service
+            android:name=".services.AudioRecordingService"
             android:enabled="true"
             android:exported="true" />
 

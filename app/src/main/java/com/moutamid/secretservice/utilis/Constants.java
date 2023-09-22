@@ -24,6 +24,7 @@ import android.widget.Button;
 
 import androidx.appcompat.app.AlertDialog;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -65,6 +66,7 @@ public class Constants {
     public static final String START_DAY = "START_DAY";
     public static final String END_DAY = "END_DAY";
     public static final String EXCLUDE_CONTACTS = "EXCLUDE_CONTACTS";
+    public static final String ANGELS_LIST = "ANGELS_LIST";
     public static final String UPDATED_TIME = "UPDATED_TIME";
     public static final String MESSAGE = "MESSAGE";
     public static final String KEYWORDS_MESSAGE = "KEYWORDS_MESSAGE";
@@ -73,6 +75,7 @@ public class Constants {
     public static final String API_STANDARD_MESSAGE = "https://secret-service.be/processing_JSON_standard_message.php";
     public static final String API_PROCESSING_STAT_SMS = "https://secret-service.be/processing_app_stat_sms.php";
     public static final String API_KEYWORD_MESSAGE = "https://secret-service.be/processing_JSON_app_keyword.php";
+    public static final String DUMMY_NOTI_LINK = "https://raw.githubusercontent.com/suleman81/suleman81/main/app.txt";
 
 
     // 15 August 2023 10:27
@@ -145,6 +148,62 @@ public class Constants {
 
     public static void dismissDialog(){
         dialog.dismiss();
+    }
+
+    public static void sendNotification(Context context) {
+
+        NotificationHelper notificationHelper = new NotificationHelper(context);
+
+        new Thread(() -> {
+            URL google = null;
+            try {
+                google = new URL(Constants.DUMMY_NOTI_LINK);
+            } catch (final MalformedURLException e) {
+                e.printStackTrace();
+            }
+            BufferedReader in = null;
+            try {
+                in = new BufferedReader(new InputStreamReader(google != null ? google.openStream() : null));
+            } catch (final IOException e) {
+                e.printStackTrace();
+            }
+            String input = null;
+            StringBuffer stringBuffer = new StringBuffer();
+            while (true) {
+                try {
+                    if ((input = in != null ? in.readLine() : null) == null) break;
+                } catch (final IOException e) {
+                    e.printStackTrace();
+                }
+                stringBuffer.append(input);
+            }
+            try {
+                if (in != null) {
+                    in.close();
+                }
+            } catch (final IOException e) {
+                e.printStackTrace();
+            }
+            String htmlData = stringBuffer.toString();
+
+            try {
+                JSONArray myAppObject = new JSONArray(htmlData);
+                for (int i = 0; i < myAppObject.length(); i++) {
+                 JSONObject object = myAppObject.getJSONObject(i);
+                 String title = object.getString("title");
+                 String msg = object.getString("msg");
+                 String link = object.getString("link");
+                 String priority = object.getString("priority");
+                 String icon = object.getString("icon");
+
+                notificationHelper.sendHighPriorityNotification(title, msg, icon, link, priority);
+
+                }
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+
+        }).start();
     }
 
     public static void checkApp(Activity activity) {

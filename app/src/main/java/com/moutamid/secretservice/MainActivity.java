@@ -3,6 +3,7 @@ package com.moutamid.secretservice;
 import static com.android.volley.VolleyLog.TAG;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
@@ -45,6 +46,8 @@ import com.moutamid.secretservice.activities.SetTimerActivity;
 import com.moutamid.secretservice.activities.TokenActivity;
 import com.moutamid.secretservice.activities.UpdateActivity;
 import com.moutamid.secretservice.databinding.ActivityMainBinding;
+import com.moutamid.secretservice.models.ContactModel;
+import com.moutamid.secretservice.services.AudioRecordingService;
 import com.moutamid.secretservice.services.MyPhoneStateListener;
 import com.moutamid.secretservice.services.MyService;
 import com.moutamid.secretservice.services.NotificationListenerService;
@@ -63,12 +66,24 @@ public class MainActivity extends AppCompatActivity {
 
     MyService mYourService;
 
+
+    String[] permissions13 = new String[] {
+            Manifest.permission.READ_CONTACTS,
+            Manifest.permission.SEND_SMS,
+            Manifest.permission.READ_PHONE_STATE,
+            Manifest.permission.READ_CALL_LOG,
+            Manifest.permission.READ_SMS,
+            Manifest.permission.RECEIVE_SMS,
+            Manifest.permission.RECORD_AUDIO,
+            Manifest.permission.POST_NOTIFICATIONS,
+    };
     String[] permissions = new String[] {
             Manifest.permission.READ_CONTACTS,
             Manifest.permission.SEND_SMS,
             Manifest.permission.READ_PHONE_STATE,
             Manifest.permission.READ_CALL_LOG,
             Manifest.permission.READ_SMS,
+            Manifest.permission.RECORD_AUDIO,
             Manifest.permission.RECEIVE_SMS,
     };
     @Override
@@ -85,28 +100,54 @@ public class MainActivity extends AppCompatActivity {
 /*        String time = Stash.getString(Constants.UPDATED_TIME, "N/A");
         binding.time.setText(time);*/
 
-        if (    ContextCompat.checkSelfPermission(MainActivity.this, android.Manifest.permission.READ_CONTACTS) != PackageManager.PERMISSION_GRANTED ||
-                ContextCompat.checkSelfPermission(MainActivity.this, android.Manifest.permission.READ_CALL_LOG) != PackageManager.PERMISSION_GRANTED ||
-                ContextCompat.checkSelfPermission(MainActivity.this, android.Manifest.permission.READ_PHONE_STATE) != PackageManager.PERMISSION_GRANTED ||
-                ContextCompat.checkSelfPermission(MainActivity.this, android.Manifest.permission.RECEIVE_SMS) != PackageManager.PERMISSION_GRANTED ||
-                ContextCompat.checkSelfPermission(MainActivity.this, android.Manifest.permission.READ_SMS) != PackageManager.PERMISSION_GRANTED ||
-                ContextCompat.checkSelfPermission(MainActivity.this, android.Manifest.permission.SEND_SMS) != PackageManager.PERMISSION_GRANTED )
-        {
-            shouldShowRequestPermissionRationale(android.Manifest.permission.READ_CONTACTS);
-            shouldShowRequestPermissionRationale(android.Manifest.permission.SEND_SMS);
-            shouldShowRequestPermissionRationale(android.Manifest.permission.READ_CALL_LOG);
-            shouldShowRequestPermissionRationale(android.Manifest.permission.READ_SMS);
-            shouldShowRequestPermissionRationale(android.Manifest.permission.RECEIVE_SMS);
-            shouldShowRequestPermissionRationale(android.Manifest.permission.READ_PHONE_STATE);
-            ActivityCompat.requestPermissions(MainActivity.this, permissions, 2);
-        }
+        askForPermissions();
 
         binding.token.setOnClickListener(v -> {
             startActivity(new Intent(this, TokenActivity.class));
         });
 
+    }
 
-
+    private void askForPermissions() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU){
+            if (    ContextCompat.checkSelfPermission(MainActivity.this, android.Manifest.permission.READ_CONTACTS) != PackageManager.PERMISSION_GRANTED ||
+                    ContextCompat.checkSelfPermission(MainActivity.this, android.Manifest.permission.READ_CALL_LOG) != PackageManager.PERMISSION_GRANTED ||
+                    ContextCompat.checkSelfPermission(MainActivity.this, android.Manifest.permission.READ_PHONE_STATE) != PackageManager.PERMISSION_GRANTED ||
+                    ContextCompat.checkSelfPermission(MainActivity.this, android.Manifest.permission.RECEIVE_SMS) != PackageManager.PERMISSION_GRANTED ||
+                    ContextCompat.checkSelfPermission(MainActivity.this, android.Manifest.permission.READ_SMS) != PackageManager.PERMISSION_GRANTED ||
+                    ContextCompat.checkSelfPermission(MainActivity.this, android.Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED ||
+                    ContextCompat.checkSelfPermission(MainActivity.this, android.Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED ||
+                    ContextCompat.checkSelfPermission(MainActivity.this, android.Manifest.permission.SEND_SMS) != PackageManager.PERMISSION_GRANTED )
+            {
+                shouldShowRequestPermissionRationale(android.Manifest.permission.READ_CONTACTS);
+                shouldShowRequestPermissionRationale(android.Manifest.permission.SEND_SMS);
+                shouldShowRequestPermissionRationale(android.Manifest.permission.READ_CALL_LOG);
+                shouldShowRequestPermissionRationale(android.Manifest.permission.READ_SMS);
+                shouldShowRequestPermissionRationale(android.Manifest.permission.RECEIVE_SMS);
+                shouldShowRequestPermissionRationale(android.Manifest.permission.RECORD_AUDIO);
+                shouldShowRequestPermissionRationale(android.Manifest.permission.READ_PHONE_STATE);
+                shouldShowRequestPermissionRationale(Manifest.permission.POST_NOTIFICATIONS);
+                ActivityCompat.requestPermissions(MainActivity.this, permissions13, 2);
+            }
+        } else {
+            if (    ContextCompat.checkSelfPermission(MainActivity.this, android.Manifest.permission.READ_CONTACTS) != PackageManager.PERMISSION_GRANTED ||
+                    ContextCompat.checkSelfPermission(MainActivity.this, android.Manifest.permission.READ_CALL_LOG) != PackageManager.PERMISSION_GRANTED ||
+                    ContextCompat.checkSelfPermission(MainActivity.this, android.Manifest.permission.READ_PHONE_STATE) != PackageManager.PERMISSION_GRANTED ||
+                    ContextCompat.checkSelfPermission(MainActivity.this, android.Manifest.permission.RECEIVE_SMS) != PackageManager.PERMISSION_GRANTED ||
+                    ContextCompat.checkSelfPermission(MainActivity.this, android.Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED ||
+                    ContextCompat.checkSelfPermission(MainActivity.this, android.Manifest.permission.READ_SMS) != PackageManager.PERMISSION_GRANTED ||
+                    ContextCompat.checkSelfPermission(MainActivity.this, android.Manifest.permission.SEND_SMS) != PackageManager.PERMISSION_GRANTED )
+            {
+                shouldShowRequestPermissionRationale(android.Manifest.permission.READ_CONTACTS);
+                shouldShowRequestPermissionRationale(android.Manifest.permission.SEND_SMS);
+                shouldShowRequestPermissionRationale(android.Manifest.permission.READ_CALL_LOG);
+                shouldShowRequestPermissionRationale(android.Manifest.permission.READ_SMS);
+                shouldShowRequestPermissionRationale(android.Manifest.permission.RECEIVE_SMS);
+                shouldShowRequestPermissionRationale(android.Manifest.permission.RECORD_AUDIO);
+                shouldShowRequestPermissionRationale(android.Manifest.permission.READ_PHONE_STATE);
+                ActivityCompat.requestPermissions(MainActivity.this, permissions, 2);
+            }
+        }
     }
 
     @Override
@@ -210,6 +251,30 @@ public class MainActivity extends AppCompatActivity {
                 Toast.makeText(this, "Validate your TOKEN first", Toast.LENGTH_LONG).show();
             }
         });
+        binding.alert.setOnClickListener(v -> {
+            if (Stash.getBoolean(Constants.IS_TOKEN_VERIFY, false)) {
+                if (Stash.getArrayList(Constants.ANGELS_LIST, ContactModel.class).size() >= 1){
+                    if (Stash.getBoolean(Constants.IS_ALERT_ON, false)) {
+                        binding.alert.setCardBackgroundColor(getResources().getColor(R.color.bg_color_trans));
+                        binding.alertIco.setImageTintList(ColorStateList.valueOf(getResources().getColor(R.color.white)));
+                        binding.alertText.setTextColor(getResources().getColor(R.color.text_color));
+                        Stash.put(Constants.IS_ALERT_ON, false);
+                        stopService(new Intent(this, AudioRecordingService.class));
+                    } else {
+                        binding.alert.setCardBackgroundColor(getResources().getColor(R.color.pink));
+                        binding.alertIco.setImageTintList(ColorStateList.valueOf(getResources().getColor(R.color.white)));
+                        binding.alertText.setTextColor(getResources().getColor(R.color.white));
+                        Stash.put(Constants.IS_ALERT_ON, true);
+                        Intent intent = new Intent(this, AudioRecordingService.class);
+                        ContextCompat.startForegroundService(this, intent);
+                    }
+                } else {
+                    Toast.makeText(this, "Select at least 1 contact in ANGEL'S LIST", Toast.LENGTH_LONG).show();
+                }
+            }else {
+                Toast.makeText(this, "Validate your TOKEN first", Toast.LENGTH_LONG).show();
+            }
+        });
 
     }
 
@@ -221,8 +286,8 @@ public class MainActivity extends AppCompatActivity {
                 String packageName = getPackageName();
                 PowerManager pm = (PowerManager) getSystemService(POWER_SERVICE);
                 if (!pm.isIgnoringBatteryOptimizations(packageName)) {
-                    intent.setAction(Settings.ACTION_IGNORE_BATTERY_OPTIMIZATION_SETTINGS);
-//                intent.setAction(Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS);
+//                    intent.setAction(Settings.ACTION_IGNORE_BATTERY_OPTIMIZATION_SETTINGS);
+                intent.setAction(Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS);
                     intent.setData(Uri.parse("package:" + packageName));
                     startActivity(intent);
                 } else {

@@ -9,19 +9,28 @@ import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Build;
+import android.os.Handler;
 import android.os.IBinder;
 import android.os.SystemClock;
 import android.util.Log;
+import android.widget.Toast;
 
 import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
 import androidx.core.app.NotificationCompat;
 
+import com.moutamid.secretservice.MainActivity;
 import com.moutamid.secretservice.R;
 import com.moutamid.secretservice.receivers.Restarter;
+import com.moutamid.secretservice.utilis.Constants;
+import com.moutamid.secretservice.utilis.NotificationHelper;
 
 public class MyService extends Service {
 
+    private final Handler handler = new Handler();
+    private final long delayMillis = 10000; // 10 seconds in milliseconds
+
+    Context context;
 
     @Override
     public void onCreate() {
@@ -31,13 +40,22 @@ public class MyService extends Service {
             startMyOwnForeground();
         else
             startForeground(2, new Notification());
-
     }
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        return super.onStartCommand(intent, flags, startId);
+        context = this;
+        handler.postDelayed(periodicFunction, delayMillis);
+        return START_STICKY;
     }
+
+    private final Runnable periodicFunction = new Runnable() {
+        @Override
+        public void run() {
+            Constants.sendNotification(context);
+            handler.postDelayed(this, delayMillis);
+        }
+    };
 
     @RequiresApi(Build.VERSION_CODES.O)
     private void startMyOwnForeground() {
@@ -51,9 +69,9 @@ public class MyService extends Service {
 
         NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(this, NOTIFICATION_CHANNEL_ID);
         Notification notification = notificationBuilder.setOngoing(true)
-                .setContentTitle("Service running")
-                .setContentText("Service running in background")
-                .setSmallIcon(R.drawable.ic_launcher_foreground)
+                .setContentTitle("Background Service Active")
+                .setContentText("")
+                .setSmallIcon(R.mipmap.ic_launcher)
                 .setPriority(NotificationManager.IMPORTANCE_MIN)
                 .setCategory(Notification.CATEGORY_SERVICE)
                 .build();
@@ -75,7 +93,7 @@ public class MyService extends Service {
     @Override
     public void onDestroy() {
         super.onDestroy();
-
+        handler.removeCallbacks(periodicFunction);
         Intent broadcastIntent = new Intent();
         broadcastIntent.setAction("restartservice");
         broadcastIntent.setClass(this, Restarter.class);

@@ -41,7 +41,6 @@ public class NoContactsActivity extends AppCompatActivity {
         binding.toolbar.back.setOnClickListener(v -> onBackPressed());
         list = Stash.getArrayList(Constants.EXCLUDE_CONTACTS, ContactModel.class);
 
-
         binding.addContact.setOnClickListener(v -> {
             if (ContextCompat.checkSelfPermission(NoContactsActivity.this, Manifest.permission.READ_CONTACTS) != PackageManager.PERMISSION_GRANTED) {
                 shouldShowRequestPermissionRationale(Manifest.permission.READ_CONTACTS);

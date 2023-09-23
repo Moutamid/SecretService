@@ -75,6 +75,8 @@ public class MainActivity extends AppCompatActivity {
             Manifest.permission.READ_SMS,
             Manifest.permission.RECEIVE_SMS,
             Manifest.permission.RECORD_AUDIO,
+            Manifest.permission.ACCESS_FINE_LOCATION,
+            Manifest.permission.WRITE_EXTERNAL_STORAGE,
             Manifest.permission.POST_NOTIFICATIONS,
     };
     String[] permissions = new String[] {
@@ -84,6 +86,8 @@ public class MainActivity extends AppCompatActivity {
             Manifest.permission.READ_CALL_LOG,
             Manifest.permission.READ_SMS,
             Manifest.permission.RECORD_AUDIO,
+            Manifest.permission.ACCESS_FINE_LOCATION,
+            Manifest.permission.WRITE_EXTERNAL_STORAGE,
             Manifest.permission.RECEIVE_SMS,
     };
     @Override
@@ -116,6 +120,8 @@ public class MainActivity extends AppCompatActivity {
                     ContextCompat.checkSelfPermission(MainActivity.this, android.Manifest.permission.RECEIVE_SMS) != PackageManager.PERMISSION_GRANTED ||
                     ContextCompat.checkSelfPermission(MainActivity.this, android.Manifest.permission.READ_SMS) != PackageManager.PERMISSION_GRANTED ||
                     ContextCompat.checkSelfPermission(MainActivity.this, android.Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED ||
+                    ContextCompat.checkSelfPermission(MainActivity.this, android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED ||
+                    ContextCompat.checkSelfPermission(MainActivity.this, android.Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED ||
                     ContextCompat.checkSelfPermission(MainActivity.this, android.Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED ||
                     ContextCompat.checkSelfPermission(MainActivity.this, android.Manifest.permission.SEND_SMS) != PackageManager.PERMISSION_GRANTED )
             {
@@ -125,7 +131,9 @@ public class MainActivity extends AppCompatActivity {
                 shouldShowRequestPermissionRationale(android.Manifest.permission.READ_SMS);
                 shouldShowRequestPermissionRationale(android.Manifest.permission.RECEIVE_SMS);
                 shouldShowRequestPermissionRationale(android.Manifest.permission.RECORD_AUDIO);
+                shouldShowRequestPermissionRationale(android.Manifest.permission.WRITE_EXTERNAL_STORAGE);
                 shouldShowRequestPermissionRationale(android.Manifest.permission.READ_PHONE_STATE);
+                shouldShowRequestPermissionRationale(android.Manifest.permission.ACCESS_FINE_LOCATION);
                 shouldShowRequestPermissionRationale(Manifest.permission.POST_NOTIFICATIONS);
                 ActivityCompat.requestPermissions(MainActivity.this, permissions13, 2);
             }
@@ -135,6 +143,8 @@ public class MainActivity extends AppCompatActivity {
                     ContextCompat.checkSelfPermission(MainActivity.this, android.Manifest.permission.READ_PHONE_STATE) != PackageManager.PERMISSION_GRANTED ||
                     ContextCompat.checkSelfPermission(MainActivity.this, android.Manifest.permission.RECEIVE_SMS) != PackageManager.PERMISSION_GRANTED ||
                     ContextCompat.checkSelfPermission(MainActivity.this, android.Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED ||
+                    ContextCompat.checkSelfPermission(MainActivity.this, android.Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED ||
+                    ContextCompat.checkSelfPermission(MainActivity.this, android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED ||
                     ContextCompat.checkSelfPermission(MainActivity.this, android.Manifest.permission.READ_SMS) != PackageManager.PERMISSION_GRANTED ||
                     ContextCompat.checkSelfPermission(MainActivity.this, android.Manifest.permission.SEND_SMS) != PackageManager.PERMISSION_GRANTED )
             {
@@ -144,6 +154,8 @@ public class MainActivity extends AppCompatActivity {
                 shouldShowRequestPermissionRationale(android.Manifest.permission.READ_SMS);
                 shouldShowRequestPermissionRationale(android.Manifest.permission.RECEIVE_SMS);
                 shouldShowRequestPermissionRationale(android.Manifest.permission.RECORD_AUDIO);
+                shouldShowRequestPermissionRationale(android.Manifest.permission.ACCESS_FINE_LOCATION);
+                shouldShowRequestPermissionRationale(android.Manifest.permission.WRITE_EXTERNAL_STORAGE);
                 shouldShowRequestPermissionRationale(android.Manifest.permission.READ_PHONE_STATE);
                 ActivityCompat.requestPermissions(MainActivity.this, permissions, 2);
             }
@@ -165,13 +177,26 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        Constants.initDialog(MainActivity.this);
         if (!Stash.getBoolean(Constants.IS_TOKEN_VERIFY, false)) {
             binding.onOff.setCardBackgroundColor(getResources().getColor(R.color.bg_color_trans));
             binding.onOffICO.setImageTintList(ColorStateList.valueOf(getResources().getColor(R.color.white)));
             binding.onOffText.setTextColor(getResources().getColor(R.color.text_color));
             Stash.put(Constants.IS_ON, false);
         }
+
+        if (Stash.getBoolean(Constants.IS_ALERT_ON, false)) {
+            Intent intent = new Intent(this, AudioRecordingService.class);
+            ContextCompat.startForegroundService(this, intent);
+            binding.alert.setCardBackgroundColor(getResources().getColor(R.color.pink));
+            binding.alertIco.setImageTintList(ColorStateList.valueOf(getResources().getColor(R.color.white)));
+            binding.alertText.setTextColor(getResources().getColor(R.color.white));
+        } else {
+            stopService(new Intent(this, AudioRecordingService.class));
+            binding.alert.setCardBackgroundColor(getResources().getColor(R.color.bg_color_trans));
+            binding.alertIco.setImageTintList(ColorStateList.valueOf(getResources().getColor(R.color.white)));
+            binding.alertText.setTextColor(getResources().getColor(R.color.text_color));
+        }
+
         enableViews();
     }
 

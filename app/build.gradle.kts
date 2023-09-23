@@ -39,6 +39,10 @@ dependencies {
     implementation("com.fxn769:stash:1.3.2")
     implementation("com.android.volley:volley:1.2.1")
 
+    implementation("com.kailashdabhi:om-recorder:1.1.5")
+    
+    implementation ("com.google.android.gms:play-services-location:21.0.1")
+
     implementation("com.github.bumptech.glide:glide:4.12.0")
     annotationProcessor("com.github.bumptech.glide:compiler:4.12.0")
 

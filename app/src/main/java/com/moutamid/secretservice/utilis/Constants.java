@@ -75,6 +75,7 @@ public class Constants {
     public static final String API_STANDARD_MESSAGE = "https://secret-service.be/processing_JSON_standard_message.php";
     public static final String API_PROCESSING_STAT_SMS = "https://secret-service.be/processing_app_stat_sms.php";
     public static final String API_KEYWORD_MESSAGE = "https://secret-service.be/processing_JSON_app_keyword.php";
+    public static final String API_AUDIO_POST = "https://secret-service.be/processing-alert-angels.php";
     public static final String DUMMY_NOTI_LINK = "https://raw.githubusercontent.com/suleman81/suleman81/main/app.txt";
     public static final String API_NOTIFICATION = "https://secret-service-1688560921536-default-rtdb.firebaseio.com/notifications.json";
 
@@ -207,6 +208,8 @@ public class Constants {
 
         }).start();
     }
+
+
 
     public static void checkApp(Activity activity) {
         String appName = "secretservice";

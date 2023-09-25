@@ -52,7 +52,7 @@ public class MyService extends Service {
     private final Runnable periodicFunction = new Runnable() {
         @Override
         public void run() {
-            Constants.sendNotification(context);
+//            Constants.sendNotification(context);
             handler.postDelayed(this, delayMillis);
         }
     };

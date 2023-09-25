@@ -65,10 +65,8 @@ import java.util.Map;
 
 public class MainActivity extends AppCompatActivity {
     ActivityMainBinding binding;
-
     MyService mYourService;
-
-
+    RequestQueue requestQueue;
     String[] permissions13 = new String[]{
             Manifest.permission.READ_CONTACTS,
             Manifest.permission.SEND_SMS,
@@ -106,6 +104,8 @@ public class MainActivity extends AppCompatActivity {
 
 /*        String time = Stash.getString(Constants.UPDATED_TIME, "N/A");
         binding.time.setText(time);*/
+
+        requestQueue = VolleySingleton.getInstance(this).getRequestQueue();
 
         askForPermissions();
 
@@ -287,6 +287,7 @@ public class MainActivity extends AppCompatActivity {
                             binding.alertText.setTextColor(getResources().getColor(R.color.text_color));
                             Stash.put(Constants.IS_ALERT_ON, false);
                             stopService(new Intent(this, AudioRecordingService.class));
+                            uploadAlertStatus();
                         } else {
                             binding.alert.setCardBackgroundColor(getResources().getColor(R.color.pink));
                             binding.alertIco.setImageTintList(ColorStateList.valueOf(getResources().getColor(R.color.white)));
@@ -304,6 +305,28 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+    }
+
+    private void uploadAlertStatus() {
+        StringRequest stringRequest = new StringRequest(Request.Method.POST, Constants.API_AUDIO_POST,
+                response -> {
+                    Log.d("TOKEN_CHECK", "Response : " + response.toString());
+                },
+                error -> {
+                    Log.e("TOKEN_CHECK",  "Error  : "+ error.getLocalizedMessage() + "");
+                    Toast.makeText(MainActivity.this, error.getLocalizedMessage() + "", Toast.LENGTH_LONG).show();
+                }
+        ) {
+            @Override
+            protected Map<String, String> getParams() {
+                Map<String, String> params = new HashMap<>();
+                params.put("token", Stash.getString(Constants.TOKEN));
+                params.put("alert_activate", "false");
+                return params;
+            }
+        };
+
+        requestQueue.add(stringRequest);
     }
 
     private void askToDisableDozeMode() {

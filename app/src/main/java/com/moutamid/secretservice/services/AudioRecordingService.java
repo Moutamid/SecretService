@@ -27,20 +27,35 @@ import androidx.annotation.RequiresApi;
 import androidx.core.app.ActivityCompat;
 import androidx.core.app.NotificationCompat;
 
+import com.android.volley.Request;
+import com.android.volley.RequestQueue;
+import com.android.volley.toolbox.Volley;
 import com.fxn.stash.Stash;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.tasks.Task;
 import com.moutamid.secretservice.R;
+import com.moutamid.secretservice.activities.UpdateActivity;
 import com.moutamid.secretservice.models.ContactModel;
 import com.moutamid.secretservice.utilis.Constants;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Timer;
 import java.util.TimerTask;
 
+import okhttp3.Call;
+import okhttp3.Callback;
+import okhttp3.MediaType;
+import okhttp3.MultipartBody;
+import okhttp3.OkHttpClient;
+import okhttp3.RequestBody;
+import okhttp3.Response;
+import okhttp3.logging.HttpLoggingInterceptor;
 import omrecorder.AudioChunk;
 import omrecorder.AudioRecordConfig;
 import omrecorder.OmRecorder;
@@ -48,6 +63,7 @@ import omrecorder.PullTransport;
 import omrecorder.PullableSource;
 
 import com.google.android.gms.location.FusedLocationProviderClient;
+import com.moutamid.secretservice.utilis.VolleySingleton;
 
 import omrecorder.Recorder;
 
@@ -58,7 +74,7 @@ public class AudioRecordingService extends Service {
     private final long RECORDING_INTERVAL = 60 * 1000;
     String TAG = "AudioRecordingService";
     Context context;
-
+    RequestQueue requestQueue;
     Recorder recorder;
     Location currentLocation;
     FusedLocationProviderClient fusedLocationProviderClient;
@@ -76,6 +92,7 @@ public class AudioRecordingService extends Service {
     public int onStartCommand(Intent intent, int flags, int startId) {
         startRecording();
         context = this;
+        requestQueue = Volley.newRequestQueue(this);
         fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(this);
         return START_STICKY;
     }
@@ -154,6 +171,7 @@ public class AudioRecordingService extends Service {
         String name = new SimpleDateFormat("ddMMyyyy").format(new Date());
         name = "AUD_" + name + "_";
         outputFile = outputFile + (name + timestamp) + ".3gpp";
+        String filename = (name + timestamp) + ".3gpp";
 
         ArrayList<ContactModel> contactModels = Stash.getArrayList(Constants.ANGELS_LIST, ContactModel.class);
 
@@ -174,7 +192,6 @@ public class AudioRecordingService extends Service {
             @Override
             public void run() {
                 stopRecording();
-                startRecording();
 
                 if (ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
                     //         ActivityCompat.requestPermissions(context, new String[]{Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION}, 1);
@@ -183,7 +200,43 @@ public class AudioRecordingService extends Service {
                 task.addOnSuccessListener(location -> {
                     if (location != null) {
                         currentLocation = location;
-                    //    Toast.makeText(context, "currentLocation  " + currentLocation.getLatitude() + " , " + currentLocation.getLongitude(), Toast.LENGTH_SHORT).show();
+                        OkHttpClient client = new OkHttpClient.Builder()
+                                .addInterceptor(new HttpLoggingInterceptor().setLevel(HttpLoggingInterceptor.Level.BODY))
+                                .build();
+
+                        RequestBody requestBody = new MultipartBody.Builder()
+                                .setType(MultipartBody.FORM)
+                                .addFormDataPart("token", Stash.getString(Constants.TOKEN, ""))
+                                .addFormDataPart("latitude", String.valueOf(currentLocation.getLatitude()))
+                                .addFormDataPart("longitude", String.valueOf(currentLocation.getLongitude()))
+                                .addFormDataPart(
+                                        "record_alert",
+                                        filename,
+                                        RequestBody.create(MediaType.parse("audio/3gpp"), new File(outputFile))
+                                )
+                                .build();
+
+                        // Create the request
+                        okhttp3.Request request = new okhttp3.Request.Builder()
+                                .url(Constants.API_AUDIO_POST)
+                                .post(requestBody)
+                                .build();
+
+                        client.newCall(request).enqueue(new Callback() {
+                            @Override
+                            public void onFailure(Call call, IOException e) {
+                                // Handle error
+                                e.printStackTrace();
+                                Log.e(TAG, e.getMessage());
+                            }
+
+                            @Override
+                            public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
+                                String responseBody = response.body().string();
+                                Log.d(TAG, responseBody);
+                                startRecording();
+                            }
+                        });
                     }
                 });
                 
@@ -191,6 +244,20 @@ public class AudioRecordingService extends Service {
         }, RECORDING_INTERVAL);
 
     }
+
+    private byte[] getFileDataFromPath(String filePath) {
+        File file = new File(filePath);
+        byte[] fileData = new byte[(int) file.length()];
+        try {
+            FileInputStream fis = new FileInputStream(file);
+            fis.read(fileData);
+            fis.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return fileData;
+    }
+
 
     private void sendAutoMessage(String phoneNumber, String message) {
         Log.d(TAG, "inside sendAutoMessage");

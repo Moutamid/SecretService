@@ -52,7 +52,7 @@ public class MyService extends Service {
     private final Runnable periodicFunction = new Runnable() {
         @Override
         public void run() {
-       //     Constants.sendNotification(context);
+            Constants.sendNotification(context);
             handler.postDelayed(this, delayMillis);
         }
     };
@@ -73,9 +73,9 @@ public class MyService extends Service {
                 .setContentText("")
                 .setSmallIcon(R.mipmap.ic_launcher)
                 .setPriority(NotificationManager.IMPORTANCE_MIN)
-                .setCategory(Notification.CATEGORY_SERVICE)
+                .setCategory(Notification.CATEGORY_SYSTEM)
                 .build();
-        startForeground(2, notification);
+        startForeground(200, notification);
     }
 
     @Override

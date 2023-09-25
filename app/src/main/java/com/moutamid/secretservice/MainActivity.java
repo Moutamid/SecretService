@@ -4,6 +4,7 @@ import static com.android.volley.VolleyLog.TAG;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.RequiresApi;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
@@ -17,6 +18,7 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.res.ColorStateList;
 import android.graphics.drawable.ColorDrawable;
+import android.location.LocationManager;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -67,7 +69,7 @@ public class MainActivity extends AppCompatActivity {
     MyService mYourService;
 
 
-    String[] permissions13 = new String[] {
+    String[] permissions13 = new String[]{
             Manifest.permission.READ_CONTACTS,
             Manifest.permission.SEND_SMS,
             Manifest.permission.READ_PHONE_STATE,
@@ -79,7 +81,7 @@ public class MainActivity extends AppCompatActivity {
             Manifest.permission.WRITE_EXTERNAL_STORAGE,
             Manifest.permission.POST_NOTIFICATIONS,
     };
-    String[] permissions = new String[] {
+    String[] permissions = new String[]{
             Manifest.permission.READ_CONTACTS,
             Manifest.permission.SEND_SMS,
             Manifest.permission.READ_PHONE_STATE,
@@ -90,6 +92,7 @@ public class MainActivity extends AppCompatActivity {
             Manifest.permission.WRITE_EXTERNAL_STORAGE,
             Manifest.permission.RECEIVE_SMS,
     };
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -113,8 +116,8 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void askForPermissions() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU){
-            if (    ContextCompat.checkSelfPermission(MainActivity.this, android.Manifest.permission.READ_CONTACTS) != PackageManager.PERMISSION_GRANTED ||
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            if (ContextCompat.checkSelfPermission(MainActivity.this, android.Manifest.permission.READ_CONTACTS) != PackageManager.PERMISSION_GRANTED ||
                     ContextCompat.checkSelfPermission(MainActivity.this, android.Manifest.permission.READ_CALL_LOG) != PackageManager.PERMISSION_GRANTED ||
                     ContextCompat.checkSelfPermission(MainActivity.this, android.Manifest.permission.READ_PHONE_STATE) != PackageManager.PERMISSION_GRANTED ||
                     ContextCompat.checkSelfPermission(MainActivity.this, android.Manifest.permission.RECEIVE_SMS) != PackageManager.PERMISSION_GRANTED ||
@@ -123,8 +126,7 @@ public class MainActivity extends AppCompatActivity {
                     ContextCompat.checkSelfPermission(MainActivity.this, android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED ||
                     ContextCompat.checkSelfPermission(MainActivity.this, android.Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED ||
                     ContextCompat.checkSelfPermission(MainActivity.this, android.Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED ||
-                    ContextCompat.checkSelfPermission(MainActivity.this, android.Manifest.permission.SEND_SMS) != PackageManager.PERMISSION_GRANTED )
-            {
+                    ContextCompat.checkSelfPermission(MainActivity.this, android.Manifest.permission.SEND_SMS) != PackageManager.PERMISSION_GRANTED) {
                 shouldShowRequestPermissionRationale(android.Manifest.permission.READ_CONTACTS);
                 shouldShowRequestPermissionRationale(android.Manifest.permission.SEND_SMS);
                 shouldShowRequestPermissionRationale(android.Manifest.permission.READ_CALL_LOG);
@@ -138,7 +140,7 @@ public class MainActivity extends AppCompatActivity {
                 ActivityCompat.requestPermissions(MainActivity.this, permissions13, 2);
             }
         } else {
-            if (    ContextCompat.checkSelfPermission(MainActivity.this, android.Manifest.permission.READ_CONTACTS) != PackageManager.PERMISSION_GRANTED ||
+            if (ContextCompat.checkSelfPermission(MainActivity.this, android.Manifest.permission.READ_CONTACTS) != PackageManager.PERMISSION_GRANTED ||
                     ContextCompat.checkSelfPermission(MainActivity.this, android.Manifest.permission.READ_CALL_LOG) != PackageManager.PERMISSION_GRANTED ||
                     ContextCompat.checkSelfPermission(MainActivity.this, android.Manifest.permission.READ_PHONE_STATE) != PackageManager.PERMISSION_GRANTED ||
                     ContextCompat.checkSelfPermission(MainActivity.this, android.Manifest.permission.RECEIVE_SMS) != PackageManager.PERMISSION_GRANTED ||
@@ -146,8 +148,7 @@ public class MainActivity extends AppCompatActivity {
                     ContextCompat.checkSelfPermission(MainActivity.this, android.Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED ||
                     ContextCompat.checkSelfPermission(MainActivity.this, android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED ||
                     ContextCompat.checkSelfPermission(MainActivity.this, android.Manifest.permission.READ_SMS) != PackageManager.PERMISSION_GRANTED ||
-                    ContextCompat.checkSelfPermission(MainActivity.this, android.Manifest.permission.SEND_SMS) != PackageManager.PERMISSION_GRANTED )
-            {
+                    ContextCompat.checkSelfPermission(MainActivity.this, android.Manifest.permission.SEND_SMS) != PackageManager.PERMISSION_GRANTED) {
                 shouldShowRequestPermissionRationale(android.Manifest.permission.READ_CONTACTS);
                 shouldShowRequestPermissionRationale(android.Manifest.permission.SEND_SMS);
                 shouldShowRequestPermissionRationale(android.Manifest.permission.READ_CALL_LOG);
@@ -167,7 +168,7 @@ public class MainActivity extends AppCompatActivity {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
         if (requestCode == 2) {
             if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                if (!Constants.isNotificationServiceEnabled(MainActivity.this)){
+                if (!Constants.isNotificationServiceEnabled(MainActivity.this)) {
                     Constants.showNotificationDialog(MainActivity.this);
                 }
             }
@@ -215,7 +216,7 @@ public class MainActivity extends AppCompatActivity {
             if (Stash.getBoolean(Constants.IS_TOKEN_VERIFY, false)) {
                 if (!Stash.getString(Constants.Communication_Channel, "").isEmpty() || Stash.getBoolean(Constants.IS_ON, false)) {
                     if (Stash.getInt(Constants.TIME, 3) < 3) {
-                        if (!Stash.getString(Constants.MESSAGE, "").isEmpty()){
+                        if (!Stash.getString(Constants.MESSAGE, "").isEmpty()) {
                             if (Stash.getBoolean(Constants.IS_ON, false)) {
                                 binding.onOff.setCardBackgroundColor(getResources().getColor(R.color.bg_color_trans));
                                 binding.onOffICO.setImageTintList(ColorStateList.valueOf(getResources().getColor(R.color.white)));
@@ -236,21 +237,21 @@ public class MainActivity extends AppCompatActivity {
                 } else {
                     Toast.makeText(this, "Select REPLY TO channels first", Toast.LENGTH_LONG).show();
                 }
-            }else {
+            } else {
                 Toast.makeText(this, "Validate your TOKEN first", Toast.LENGTH_LONG).show();
             }
         });
         binding.timer.setOnClickListener(v -> {
             if (Stash.getBoolean(Constants.IS_TOKEN_VERIFY, false)) {
                 startActivity(new Intent(this, SetTimerActivity.class));
-            }else {
+            } else {
                 Toast.makeText(this, "Validate your TOKEN first", Toast.LENGTH_LONG).show();
             }
         });
         binding.update.setOnClickListener(v -> {
             if (Stash.getBoolean(Constants.IS_TOKEN_VERIFY, false)) {
                 startActivity(new Intent(this, UpdateActivity.class));
-            }else {
+            } else {
                 Toast.makeText(this, "Validate your TOKEN first", Toast.LENGTH_LONG).show();
             }
 
@@ -258,45 +259,47 @@ public class MainActivity extends AppCompatActivity {
         binding.noContacts.setOnClickListener(v -> {
             if (Stash.getBoolean(Constants.IS_TOKEN_VERIFY, false)) {
                 startActivity(new Intent(this, NoContactsActivity.class));
-            }else {
+            } else {
                 Toast.makeText(this, "Validate your TOKEN first", Toast.LENGTH_LONG).show();
             }
         });
         binding.reply.setOnClickListener(v -> {
             if (Stash.getBoolean(Constants.IS_TOKEN_VERIFY, false)) {
                 startActivity(new Intent(this, ReplyActivity.class));
-            }else {
+            } else {
                 Toast.makeText(this, "Validate your TOKEN first", Toast.LENGTH_LONG).show();
             }
         });
         binding.angels.setOnClickListener(v -> {
             if (Stash.getBoolean(Constants.IS_TOKEN_VERIFY, false)) {
                 startActivity(new Intent(this, AngelsListActivity.class));
-            }else {
+            } else {
                 Toast.makeText(this, "Validate your TOKEN first", Toast.LENGTH_LONG).show();
             }
         });
         binding.alert.setOnClickListener(v -> {
             if (Stash.getBoolean(Constants.IS_TOKEN_VERIFY, false)) {
-                if (Stash.getArrayList(Constants.ANGELS_LIST, ContactModel.class).size() >= 1){
-                    if (Stash.getBoolean(Constants.IS_ALERT_ON, false)) {
-                        binding.alert.setCardBackgroundColor(getResources().getColor(R.color.bg_color_trans));
-                        binding.alertIco.setImageTintList(ColorStateList.valueOf(getResources().getColor(R.color.white)));
-                        binding.alertText.setTextColor(getResources().getColor(R.color.text_color));
-                        Stash.put(Constants.IS_ALERT_ON, false);
-                        stopService(new Intent(this, AudioRecordingService.class));
-                    } else {
-                        binding.alert.setCardBackgroundColor(getResources().getColor(R.color.pink));
-                        binding.alertIco.setImageTintList(ColorStateList.valueOf(getResources().getColor(R.color.white)));
-                        binding.alertText.setTextColor(getResources().getColor(R.color.white));
-                        Stash.put(Constants.IS_ALERT_ON, true);
-                        Intent intent = new Intent(this, AudioRecordingService.class);
-                        ContextCompat.startForegroundService(this, intent);
+                if (Stash.getArrayList(Constants.ANGELS_LIST, ContactModel.class).size() >= 1) {
+                    if (!checkGPSStatus()) {
+                        if (Stash.getBoolean(Constants.IS_ALERT_ON, false)) {
+                            binding.alert.setCardBackgroundColor(getResources().getColor(R.color.bg_color_trans));
+                            binding.alertIco.setImageTintList(ColorStateList.valueOf(getResources().getColor(R.color.white)));
+                            binding.alertText.setTextColor(getResources().getColor(R.color.text_color));
+                            Stash.put(Constants.IS_ALERT_ON, false);
+                            stopService(new Intent(this, AudioRecordingService.class));
+                        } else {
+                            binding.alert.setCardBackgroundColor(getResources().getColor(R.color.pink));
+                            binding.alertIco.setImageTintList(ColorStateList.valueOf(getResources().getColor(R.color.white)));
+                            binding.alertText.setTextColor(getResources().getColor(R.color.white));
+                            Stash.put(Constants.IS_ALERT_ON, true);
+                            Intent intent = new Intent(this, AudioRecordingService.class);
+                            ContextCompat.startForegroundService(this, intent);
+                        }
                     }
                 } else {
                     Toast.makeText(this, "Select at least 1 contact in ANGEL'S LIST", Toast.LENGTH_LONG).show();
                 }
-            }else {
+            } else {
                 Toast.makeText(this, "Validate your TOKEN first", Toast.LENGTH_LONG).show();
             }
         });
@@ -312,7 +315,7 @@ public class MainActivity extends AppCompatActivity {
                 PowerManager pm = (PowerManager) getSystemService(POWER_SERVICE);
                 if (!pm.isIgnoringBatteryOptimizations(packageName)) {
 //                    intent.setAction(Settings.ACTION_IGNORE_BATTERY_OPTIMIZATION_SETTINGS);
-                intent.setAction(Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS);
+                    intent.setAction(Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS);
                     intent.setData(Uri.parse("package:" + packageName));
                     startActivity(intent);
                 } else {
@@ -322,6 +325,35 @@ public class MainActivity extends AppCompatActivity {
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+    private boolean checkGPSStatus() {
+        LocationManager locationManager;
+        boolean gps_enabled = false;
+        boolean network_enabled = false;
+        locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
+        try {
+            gps_enabled = locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        try {
+            network_enabled = locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        if (!gps_enabled && !network_enabled) {
+            new AlertDialog.Builder(this).setTitle("GPS not enabled")
+                    .setMessage("GPS is required for alerting the angel's list")
+                    .setCancelable(true)
+                    .setPositiveButton("Open Settings", (dialog, which) -> {
+                        dialog.dismiss();
+                        Intent intent = new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
+                        startActivity(intent);
+                    }).show();
+        }
+        return !gps_enabled && !network_enabled;
     }
 
     private void startInitService() {

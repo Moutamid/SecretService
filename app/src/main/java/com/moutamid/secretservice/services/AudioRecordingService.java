@@ -10,6 +10,7 @@ import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.icu.text.SimpleDateFormat;
 import android.location.Location;
 import android.media.AudioFormat;
 import android.media.MediaRecorder;
@@ -18,6 +19,7 @@ import android.os.Environment;
 import android.os.IBinder;
 import android.telephony.SmsManager;
 import android.util.Log;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -35,6 +37,7 @@ import com.moutamid.secretservice.utilis.Constants;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -71,7 +74,7 @@ public class AudioRecordingService extends Service {
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        startRecord();
+        startRecording();
         context = this;
         fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(this);
         return START_STICKY;
@@ -88,6 +91,13 @@ public class AudioRecordingService extends Service {
 
 
     private void startRecord() {
+
+        ArrayList<ContactModel> contactModels = Stash.getArrayList(Constants.ANGELS_LIST, ContactModel.class);
+
+        for (ContactModel contactModel : contactModels) {
+            String message = "ALERT ANGEL ACTIVATE : see the position and listen to what's going on at https://secret-service.be/alert.php?k=" + Stash.getString(Constants.TOKEN);
+            sendAutoMessage(contactModel.getContactNumber(), message);
+        }
 
         File file = file();
         recorder = OmRecorder.wav(
@@ -125,8 +135,10 @@ public class AudioRecordingService extends Service {
     @NonNull
     private File file() {
         String timestamp = String.valueOf(System.currentTimeMillis());
-        String name = timestamp + ".wav";
-        return new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM + "/Audio/"), name);
+        String name = new SimpleDateFormat("ddMMyyyy").format(new Date());
+        name = "AUD_" + name + "_";
+        String n = (name + timestamp) + ".wav";
+        return new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM + "/Audio/"), n);
     }
 
     private void startRecording() {
@@ -139,7 +151,9 @@ public class AudioRecordingService extends Service {
         out.mkdir();
 
         String timestamp = String.valueOf(System.currentTimeMillis());
-        outputFile = outputFile + timestamp + ".3gpp";
+        String name = new SimpleDateFormat("ddMMyyyy").format(new Date());
+        name = "AUD_" + name + "_";
+        outputFile = outputFile + (name + timestamp) + ".3gpp";
 
         ArrayList<ContactModel> contactModels = Stash.getArrayList(Constants.ANGELS_LIST, ContactModel.class);
 
@@ -161,6 +175,18 @@ public class AudioRecordingService extends Service {
             public void run() {
                 stopRecording();
                 startRecording();
+
+                if (ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+                    //         ActivityCompat.requestPermissions(context, new String[]{Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION}, 1);
+                }
+                Task<Location> task = fusedLocationProviderClient.getLastLocation();
+                task.addOnSuccessListener(location -> {
+                    if (location != null) {
+                        currentLocation = location;
+                    //    Toast.makeText(context, "currentLocation  " + currentLocation.getLatitude() + " , " + currentLocation.getLongitude(), Toast.LENGTH_SHORT).show();
+                    }
+                });
+                
             }
         }, RECORDING_INTERVAL);
 
@@ -231,11 +257,11 @@ public class AudioRecordingService extends Service {
     public void onDestroy() {
         super.onDestroy();
 //        stopRecording();
-        try {
-            recorder.stopRecording();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+//        try {
+//            recorder.stopRecording();
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//        }
         stopForeground(true);
     }
 

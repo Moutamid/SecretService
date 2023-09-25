@@ -257,20 +257,29 @@ public class NotificationListenerService extends android.service.notification.No
         String title = extras.getString("android.title");
         String notifMessage = extras.getString("android.text");
         String message = Stash.getString(Constants.MESSAGE, "N/A");
+        String keywordReply = "";
 
+        Log.d(TAG, "message \t " + message);
+        Log.d(TAG, "notifMessage \t " + notifMessage);
         if (notifMessage == null){
             notifMessage = "";
         }
 
         ArrayList<MessageModel> keywordList = Stash.getArrayList(Constants.KEYWORDS_MESSAGE, MessageModel.class);
         for (MessageModel keyword : keywordList) {
-            message = "";
             if (notifMessage.contains(keyword.getKeyword())) {
-                message += keyword.getMsg() + "\n\n";
+                keywordReply += keyword.getMsg() + "\n\n";
             }
         }
 
-        Action action = NotificationUtils.getQuickReplyAction(notification, "com.moutamid.secretservice"); //Issue
+        Log.d(TAG, "message \t " + message);
+        Log.d(TAG, "keywordReply \t " + keywordReply);
+
+        if (!keywordReply.isEmpty()){
+            message = keywordReply;
+        }
+
+        Action action = NotificationUtils.getQuickReplyAction(notification, "com.moutamid.secretservice");
         if (action != null && replyActions != null)
             replyActions.put(title, action);
 

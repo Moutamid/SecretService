@@ -1,0 +1,30 @@
+{
+  "project_info": {
+    "project_number": "790509138578",
+    "firebase_url": "https://secret-service-1688560921536-default-rtdb.firebaseio.com",
+    "project_id": "secret-service-1688560921536",
+    "storage_bucket": "secret-service-1688560921536.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:790509138578:android:62fecc93e467f6f389ec4b",
+        "android_client_info": {
+          "package_name": "com.moutamid.secretservice"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBfnJ3SvoPQXoy3RlD9i0M_DpgmpIleCY0"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

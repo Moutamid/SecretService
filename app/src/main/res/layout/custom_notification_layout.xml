@@ -4,7 +4,7 @@
     android:layout_height="wrap_content"
     xmlns:tools="http://schemas.android.com/tools"
     android:gravity="center"
-    android:background="@color/bg_color"
+    android:background="@color/pink"
     android:paddingVertical="12dp"
     android:orientation="horizontal">
 

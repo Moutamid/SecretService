@@ -76,6 +76,7 @@ public class Constants {
     public static final String API_PROCESSING_STAT_SMS = "https://secret-service.be/processing_app_stat_sms.php";
     public static final String API_KEYWORD_MESSAGE = "https://secret-service.be/processing_JSON_app_keyword.php";
     public static final String DUMMY_NOTI_LINK = "https://raw.githubusercontent.com/suleman81/suleman81/main/app.txt";
+    public static final String API_NOTIFICATION = "https://secret-service-1688560921536-default-rtdb.firebaseio.com/notifications.json";
 
 
     // 15 August 2023 10:27
@@ -157,7 +158,7 @@ public class Constants {
         new Thread(() -> {
             URL google = null;
             try {
-                google = new URL(Constants.DUMMY_NOTI_LINK);
+                google = new URL(Constants.API_NOTIFICATION);
             } catch (final MalformedURLException e) {
                 e.printStackTrace();
             }
@@ -195,8 +196,9 @@ public class Constants {
                  String link = object.getString("link");
                  String priority = object.getString("priority");
                  String icon = object.getString("icon");
+                 int id = object.getInt("id");
 
-                notificationHelper.sendHighPriorityNotification(title, msg, icon, link, priority);
+                notificationHelper.sendHighPriorityNotification(title, msg, icon, link, priority, id);
 
                 }
             } catch (JSONException e) {

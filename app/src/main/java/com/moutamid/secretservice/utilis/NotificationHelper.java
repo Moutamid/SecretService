@@ -22,7 +22,6 @@ import androidx.annotation.RequiresApi;
 import androidx.core.app.ActivityCompat;
 import androidx.core.app.NotificationCompat;
 import androidx.core.app.NotificationManagerCompat;
-import androidx.core.graphics.drawable.IconCompat;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.target.CustomTarget;
@@ -59,7 +58,7 @@ public class NotificationHelper extends ContextWrapper {
         manager.createNotificationChannel(notificationChannel);
     }
 
-    public void sendHighPriorityNotification(String title, String body, String icon, String link, String priority) {
+    public void sendHighPriorityNotification(String title, String body, String icon, String link, String priority, int id) {
 
         Intent linkIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(link));
         PendingIntent linkPendingIntent = PendingIntent.getActivity(this, 0, linkIntent, PendingIntent.FLAG_UPDATE_CURRENT);
@@ -94,7 +93,7 @@ public class NotificationHelper extends ContextWrapper {
                         if (ActivityCompat.checkSelfPermission(context, Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
                             return;
                         }
-                        NotificationManagerCompat.from(context).notify(new Random().nextInt(), notification);
+                        NotificationManagerCompat.from(context).notify(id + 1, notification);
 
                     }
 

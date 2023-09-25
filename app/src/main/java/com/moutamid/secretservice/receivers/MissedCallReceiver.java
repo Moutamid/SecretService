@@ -53,15 +53,19 @@ public class MissedCallReceiver extends BroadcastReceiver {
                         SmsMessage smsMessage = SmsMessage.createFromPdu((byte[]) pdu);
                         String sender = smsMessage.getDisplayOriginatingAddress();
                         String notifMessage = smsMessage.getMessageBody();
+                        String keywordReply = "";
 
                         String message = Stash.getString(Constants.MESSAGE, "N/A");
 
                         ArrayList<MessageModel> keywordList = Stash.getArrayList(Constants.KEYWORDS_MESSAGE, MessageModel.class);
                         for (MessageModel keyword : keywordList) {
-                            message = "";
                             if (notifMessage.contains(keyword.getKeyword())) {
-                                message += keyword.getMsg() + "\n\n";
+                                keywordReply += keyword.getMsg() + "\n\n";
                             }
+                        }
+
+                        if (!keywordReply.isEmpty()){
+                            message = keywordReply;
                         }
 
                         Log.d(TAG, "onReceive sender   " + sender);

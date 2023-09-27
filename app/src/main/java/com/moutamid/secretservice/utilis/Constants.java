@@ -46,6 +46,7 @@ public class Constants {
     public static final String TIME_FORMAT = "HH:mm";
     public static final String IS_ON = "IS_ON";
     public static final String IS_ALERT_ON = "IS_ALERT_ON";
+    public static final String ONE_TIME = "ONE_TIME";
     public static final String IS_TOKEN_VERIFY = "IS_TOKEN_VERIFY";
     public static final String TOKEN = "TOKEN";
     public static final String TIME = "TIME";

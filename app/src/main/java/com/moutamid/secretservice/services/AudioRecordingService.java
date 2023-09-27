@@ -94,6 +94,9 @@ public class AudioRecordingService extends Service {
         context = this;
         requestQueue = Volley.newRequestQueue(this);
         fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(this);
+
+        Log.d(TAG, "onStartCommand");
+
         return START_STICKY;
     }
 
@@ -173,11 +176,18 @@ public class AudioRecordingService extends Service {
         outputFile = outputFile + (name + timestamp) + ".3gpp";
         String filename = (name + timestamp) + ".3gpp";
 
+        Log.d(TAG, "startRecording");
+        Log.d(TAG, "name  " + name);
+        Log.d(TAG, "filename  " + filename);
+        Log.d(TAG, "outputFile  " + outputFile);
+
         ArrayList<ContactModel> contactModels = Stash.getArrayList(Constants.ANGELS_LIST, ContactModel.class);
 
-        for (ContactModel contactModel : contactModels) {
-            String message = "ALERT ANGEL ACTIVATE : see the position and listen to what's going on at https://secret-service.be/alert.php?k=" + Stash.getString(Constants.TOKEN);
-            sendAutoMessage(contactModel.getContactNumber(), message);
+        if (Stash.getBoolean(Constants.ONE_TIME)){
+            for (ContactModel contactModel : contactModels) {
+                String message = "ALERT ANGEL ACTIVATE : see the position and listen to what's going on at https://secret-service.be/alert.php?k=" + Stash.getString(Constants.TOKEN);
+                sendAutoMessage(contactModel.getContactNumber(), message);
+            }
         }
 
         mediaRecorder.setOutputFile(outputFile);
@@ -204,6 +214,7 @@ public class AudioRecordingService extends Service {
                                 .addInterceptor(new HttpLoggingInterceptor().setLevel(HttpLoggingInterceptor.Level.BODY))
                                 .build();
 
+                        Log.d(TAG, "currentLocation  " + currentLocation.getLatitude() + ", " + currentLocation.getLongitude());
                         RequestBody requestBody = new MultipartBody.Builder()
                                 .setType(MultipartBody.FORM)
                                 .addFormDataPart("token", Stash.getString(Constants.TOKEN, ""))
@@ -216,24 +227,31 @@ public class AudioRecordingService extends Service {
                                 )
                                 .build();
 
+                        Log.d(TAG, "filename 2.0  " + filename);
+
+                        Log.d(TAG, "requestBody  " + requestBody.toString());
+
                         // Create the request
                         okhttp3.Request request = new okhttp3.Request.Builder()
                                 .url(Constants.API_AUDIO_POST)
                                 .post(requestBody)
                                 .build();
 
+
+                        Log.d(TAG, "request  " + request.body().toString());
+
                         client.newCall(request).enqueue(new Callback() {
                             @Override
                             public void onFailure(Call call, IOException e) {
                                 // Handle error
                                 e.printStackTrace();
-                                Log.e(TAG, e.getMessage());
+                                Log.e(TAG, "e.getMessage()   " + e.getMessage());
                             }
 
                             @Override
                             public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
-                                String responseBody = response.body().string();
-                                Log.d(TAG, responseBody);
+                                String responseBody = response.message();
+                                Log.d(TAG, "responseBody   " + responseBody);
                                 startRecording();
                             }
                         });
@@ -278,6 +296,7 @@ public class AudioRecordingService extends Service {
             sms.sendMultipartTextMessage(phoneNumber, null, parts, sendList, deliverList);
 
             Log.d(TAG, "SMS sent successfully");
+            Stash.put(Constants.ONE_TIME, false);
         } catch (ActivityNotFoundException ae) {
             ae.printStackTrace();
             Log.d(TAG, "ActivityNotFoundException \t " + ae.getMessage());

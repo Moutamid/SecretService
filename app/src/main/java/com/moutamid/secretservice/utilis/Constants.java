@@ -71,7 +71,7 @@ public class Constants {
     public static final String UPDATED_TIME = "UPDATED_TIME";
     public static final String MESSAGE = "MESSAGE";
     public static final String KEYWORDS_MESSAGE = "KEYWORDS_MESSAGE";
-    public static final String Communication_Channel  = "Communication_Channel";
+    public static final String Communication_Channel = "Communication_Channel";
     public static final String API_TOKEN = "https://secret-service.be/processing_JSON_token.php";
     public static final String API_STANDARD_MESSAGE = "https://secret-service.be/processing_JSON_standard_message.php";
     public static final String API_PROCESSING_STAT_SMS = "https://secret-service.be/processing_app_stat_sms.php";
@@ -82,22 +82,25 @@ public class Constants {
 
 
     // 15 August 2023 10:27
-    public static String getFormattedDate(long date){
+    public static String getFormattedDate(long date) {
         return new SimpleDateFormat(DATE_FORMAT, Locale.getDefault()).format(date);
     }
-    public static String getFormattedTime(long time){
+
+    public static String getFormattedTime(long time) {
         SimpleDateFormat sdf = new SimpleDateFormat(TIME_FORMAT, Locale.getDefault());
 //        sdf.setTimeZone(TimeZone.getTimeZone("UTC"));
         return sdf.format(time);
     }
-    public static String getFormattedDay(long time){
+
+    public static String getFormattedDay(long time) {
         return new SimpleDateFormat(DAY_FORMAT, Locale.getDefault()).format(time);
     }
+
     public static String getFormattedHours(long time) {
         return new SimpleDateFormat("HH", Locale.getDefault()).format(time);
     }
 
-    public static void initDialog(Context context){
+    public static void initDialog(Context context) {
         dialog = new Dialog(context);
         dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
         dialog.setContentView(R.layout.loading_dialog);
@@ -145,11 +148,11 @@ public class Constants {
         return false;
     }
 
-    public static void showDialog(){
+    public static void showDialog() {
         dialog.show();
     }
 
-    public static void dismissDialog(){
+    public static void dismissDialog() {
         dialog.dismiss();
     }
 
@@ -192,16 +195,19 @@ public class Constants {
             try {
                 JSONArray myAppObject = new JSONArray(htmlData);
                 for (int i = 0; i < myAppObject.length(); i++) {
-                 JSONObject object = myAppObject.getJSONObject(i);
-                 String title = object.getString("title");
-                 String msg = object.getString("msg");
-                 String link = object.getString("link");
-                 String priority = object.getString("priority");
-                 String icon = object.getString("icon");
-                 int id = object.getInt("id");
+                    JSONObject object = myAppObject.getJSONObject(i);
+                    String title = object.getString("title");
+                    String msg = object.getString("msg");
+                    String link = object.getString("link");
+                    String priority = object.getString("priority");
+                    String token = object.getString("token");
+//                    String icon = object.getString("icon");
+                    String icon = "";
+                    int id = object.getInt("id");
 
-                notificationHelper.sendHighPriorityNotification(title, msg, icon, link, priority, id);
-
+                    if (token.equals(Stash.getString(Constants.TOKEN))) {
+                        notificationHelper.sendHighPriorityNotification(title, msg, icon, link, priority, id);
+                    }
                 }
             } catch (JSONException e) {
                 e.printStackTrace();
@@ -209,7 +215,6 @@ public class Constants {
 
         }).start();
     }
-
 
 
     public static void checkApp(Activity activity) {
@@ -304,7 +309,6 @@ public class Constants {
                 e.printStackTrace();
             }
             String htmlData = stringBuffer.toString();
-
 
 
         }).start();

@@ -65,7 +65,30 @@ public class NotificationHelper extends ContextWrapper {
 
         int prio = priority.equals("high") ? NotificationCompat.PRIORITY_HIGH : NotificationCompat.PRIORITY_LOW;
 
-        Glide.with(this)
+        RemoteViews customNotificationLayout = new RemoteViews(getPackageName(), R.layout.custom_notification_layout);
+
+        // Set the loaded image as the icon in the custom layout
+        customNotificationLayout.setImageViewResource(R.id.custom_notification_icon, R.mipmap.ic_launcher);
+
+        // Set the title and body text
+        customNotificationLayout.setTextViewText(R.id.custom_notification_title, title);
+        customNotificationLayout.setTextViewText(R.id.custom_notification_body, body);
+
+        // Create the notification
+        Notification notification = new NotificationCompat.Builder(context, CHANNEL_ID)
+                .setSmallIcon(R.mipmap.ic_launcher)
+                .setPriority(prio)
+                .setContentIntent(linkPendingIntent)
+                .setCustomContentView(customNotificationLayout)
+                .setAutoCancel(true)
+                .build();
+
+        if (ActivityCompat.checkSelfPermission(context, Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
+            return;
+        }
+        NotificationManagerCompat.from(context).notify(id + 1, notification);
+
+/*        Glide.with(this)
                 .asBitmap()
                 .load(icon)
                 .into(new CustomTarget<Bitmap>() {
@@ -101,12 +124,7 @@ public class NotificationHelper extends ContextWrapper {
                     public void onLoadCleared(@Nullable Drawable placeholder) {
                         // Handle any cleanup if needed
                     }
-                });
-
-
-
-
-
+                });*/
 
     }
 

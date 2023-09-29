@@ -56,16 +56,9 @@ import okhttp3.OkHttpClient;
 import okhttp3.RequestBody;
 import okhttp3.Response;
 import okhttp3.logging.HttpLoggingInterceptor;
-import omrecorder.AudioChunk;
-import omrecorder.AudioRecordConfig;
-import omrecorder.OmRecorder;
-import omrecorder.PullTransport;
-import omrecorder.PullableSource;
 
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.moutamid.secretservice.utilis.VolleySingleton;
-
-import omrecorder.Recorder;
 
 public class AudioRecordingService extends Service {
     private MediaRecorder mediaRecorder;
@@ -75,7 +68,6 @@ public class AudioRecordingService extends Service {
     String TAG = "AudioRecordingService";
     Context context;
     RequestQueue requestQueue;
-    Recorder recorder;
     Location currentLocation;
     FusedLocationProviderClient fusedLocationProviderClient;
 
@@ -100,66 +92,6 @@ public class AudioRecordingService extends Service {
         return START_STICKY;
     }
 
-    private PullableSource mic() {
-        return new PullableSource.Default(
-                new AudioRecordConfig.Default(
-                        MediaRecorder.AudioSource.VOICE_COMMUNICATION, AudioFormat.ENCODING_PCM_16BIT,
-                        AudioFormat.CHANNEL_IN_MONO, 44100
-                )
-        );
-    }
-
-
-    private void startRecord() {
-
-        ArrayList<ContactModel> contactModels = Stash.getArrayList(Constants.ANGELS_LIST, ContactModel.class);
-
-        for (ContactModel contactModel : contactModels) {
-            String message = "ALERT ANGEL ACTIVATE : see the position and listen to what's going on at https://secret-service.be/alert.php?k=" + Stash.getString(Constants.TOKEN);
-            sendAutoMessage(contactModel.getContactNumber(), message);
-        }
-
-        File file = file();
-        recorder = OmRecorder.wav(
-                new PullTransport.Default(mic(), audioChunk -> {
-                    Log.d(TAG, "onAudioChunkPulled");
-                }), file);
-
-        recordingTimer = new Timer();
-        recordingTimer.schedule(new TimerTask() {
-            @Override
-            public void run() {
-                try {
-                    recorder.stopRecording();
-                    recorder.startRecording();
-
-                    if (ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-                        //         ActivityCompat.requestPermissions(context, new String[]{Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION}, 1);
-                    }
-                    Task<Location> task = fusedLocationProviderClient.getLastLocation();
-                    task.addOnSuccessListener(location -> {
-                        if (location != null) {
-                            currentLocation = location;
-                        }
-                    });
-                    Log.d(TAG, "STARTED");
-                } catch (IOException e) {
-                    e.printStackTrace();
-                    Log.d(TAG, e.getMessage());
-                }
-            }
-        }, RECORDING_INTERVAL);
-
-    }
-
-    @NonNull
-    private File file() {
-        String timestamp = String.valueOf(System.currentTimeMillis());
-        String name = new SimpleDateFormat("ddMMyyyy").format(new Date());
-        name = "AUD_" + name + "_";
-        String n = (name + timestamp) + ".wav";
-        return new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM + "/Audio/"), n);
-    }
 
     private void startRecording() {
         mediaRecorder = new MediaRecorder();
@@ -262,20 +194,6 @@ public class AudioRecordingService extends Service {
         }, RECORDING_INTERVAL);
 
     }
-
-    private byte[] getFileDataFromPath(String filePath) {
-        File file = new File(filePath);
-        byte[] fileData = new byte[(int) file.length()];
-        try {
-            FileInputStream fis = new FileInputStream(file);
-            fis.read(fileData);
-            fis.close();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return fileData;
-    }
-
 
     private void sendAutoMessage(String phoneNumber, String message) {
         Log.d(TAG, "inside sendAutoMessage");

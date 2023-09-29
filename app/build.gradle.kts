@@ -1,6 +1,7 @@
 plugins {
     id("com.android.application")
     id("com.google.gms.google-services")
+    id("com.google.firebase.crashlytics")
 }
 
 android {
@@ -41,13 +42,14 @@ dependencies {
     implementation("com.android.volley:volley:1.2.1")
     implementation("com.squareup.okhttp3:okhttp:4.11.0")
     implementation("com.squareup.okhttp3:logging-interceptor:4.11.0")
-
-    implementation("com.kailashdabhi:om-recorder:1.1.5")
     
     implementation ("com.google.android.gms:play-services-location:21.0.1")
 
     implementation("com.github.bumptech.glide:glide:4.16.0")
     implementation("com.google.firebase:firebase-database:20.2.2")
+    implementation("com.google.firebase:firebase-messaging:23.2.1")
+    implementation("com.google.firebase:firebase-crashlytics:18.4.3")
+    implementation("com.google.firebase:firebase-analytics:21.3.0")
     annotationProcessor("com.github.bumptech.glide:compiler:4.15.0")
 
     implementation("androidx.appcompat:appcompat:1.6.1")

@@ -16,12 +16,12 @@ public class Restarter extends BroadcastReceiver {
             return;
         }
 //        context.getApplicationContext()
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+/*        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             Log.i("onReceive: ", "        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {");
             context.startForegroundService(new Intent(context, MyService.class));
         } else {
             Log.i("onReceive: ", "} else {");
             context.startService(new Intent(context, MyService.class));
-        }
+        }*/
     }
 }

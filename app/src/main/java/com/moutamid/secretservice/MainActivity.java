@@ -41,6 +41,7 @@ import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.StringRequest;
 import com.fxn.stash.Stash;
+import com.google.firebase.messaging.FirebaseMessaging;
 import com.moutamid.secretservice.activities.AngelsListActivity;
 import com.moutamid.secretservice.activities.NoContactsActivity;
 import com.moutamid.secretservice.activities.ReplyActivity;
@@ -63,10 +64,12 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
+
 public class MainActivity extends AppCompatActivity {
     ActivityMainBinding binding;
     MyService mYourService;
     RequestQueue requestQueue;
+    @RequiresApi(api = Build.VERSION_CODES.TIRAMISU)
     String[] permissions13 = new String[]{
             Manifest.permission.READ_CONTACTS,
             Manifest.permission.SEND_SMS,
@@ -75,6 +78,9 @@ public class MainActivity extends AppCompatActivity {
             Manifest.permission.READ_SMS,
             Manifest.permission.RECEIVE_SMS,
             Manifest.permission.RECORD_AUDIO,
+            Manifest.permission.READ_MEDIA_VIDEO,
+            Manifest.permission.READ_MEDIA_IMAGES,
+            Manifest.permission.READ_MEDIA_AUDIO,
             Manifest.permission.ACCESS_FINE_LOCATION,
             Manifest.permission.WRITE_EXTERNAL_STORAGE,
             Manifest.permission.POST_NOTIFICATIONS,
@@ -98,7 +104,7 @@ public class MainActivity extends AppCompatActivity {
         setContentView(binding.getRoot());
         Constants.checkApp(this);
 
-        startInitService();
+  //      startInitService();
 
         askToDisableDozeMode();
 
@@ -123,6 +129,9 @@ public class MainActivity extends AppCompatActivity {
                     ContextCompat.checkSelfPermission(MainActivity.this, android.Manifest.permission.RECEIVE_SMS) != PackageManager.PERMISSION_GRANTED ||
                     ContextCompat.checkSelfPermission(MainActivity.this, android.Manifest.permission.READ_SMS) != PackageManager.PERMISSION_GRANTED ||
                     ContextCompat.checkSelfPermission(MainActivity.this, android.Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED ||
+                    ContextCompat.checkSelfPermission(MainActivity.this, android.Manifest.permission.READ_MEDIA_AUDIO) != PackageManager.PERMISSION_GRANTED ||
+                    ContextCompat.checkSelfPermission(MainActivity.this, android.Manifest.permission.READ_MEDIA_IMAGES) != PackageManager.PERMISSION_GRANTED ||
+                    ContextCompat.checkSelfPermission(MainActivity.this, android.Manifest.permission.READ_MEDIA_VIDEO) != PackageManager.PERMISSION_GRANTED ||
                     ContextCompat.checkSelfPermission(MainActivity.this, android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED ||
                     ContextCompat.checkSelfPermission(MainActivity.this, android.Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED ||
                     ContextCompat.checkSelfPermission(MainActivity.this, android.Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED ||
@@ -136,6 +145,9 @@ public class MainActivity extends AppCompatActivity {
                 shouldShowRequestPermissionRationale(android.Manifest.permission.WRITE_EXTERNAL_STORAGE);
                 shouldShowRequestPermissionRationale(android.Manifest.permission.READ_PHONE_STATE);
                 shouldShowRequestPermissionRationale(android.Manifest.permission.ACCESS_FINE_LOCATION);
+                shouldShowRequestPermissionRationale(android.Manifest.permission.READ_MEDIA_AUDIO);
+                shouldShowRequestPermissionRationale(Manifest.permission.READ_MEDIA_IMAGES);
+                shouldShowRequestPermissionRationale(Manifest.permission.READ_MEDIA_VIDEO);
                 shouldShowRequestPermissionRationale(Manifest.permission.POST_NOTIFICATIONS);
                 ActivityCompat.requestPermissions(MainActivity.this, permissions13, 2);
             }
@@ -196,6 +208,11 @@ public class MainActivity extends AppCompatActivity {
             binding.alert.setCardBackgroundColor(getResources().getColor(R.color.bg_color_trans));
             binding.alertIco.setImageTintList(ColorStateList.valueOf(getResources().getColor(R.color.white)));
             binding.alertText.setTextColor(getResources().getColor(R.color.text_color));
+        }
+
+        if (!Stash.getString(Constants.TOKEN, "").isEmpty()){
+            FirebaseMessaging.getInstance().subscribeToTopic(Stash.getString(Constants.TOKEN, ""))
+                    .addOnSuccessListener(unused -> {});
         }
 
         enableViews();

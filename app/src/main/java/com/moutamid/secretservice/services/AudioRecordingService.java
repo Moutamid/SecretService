@@ -16,7 +16,9 @@ import android.media.AudioFormat;
 import android.media.MediaRecorder;
 import android.os.Build;
 import android.os.Environment;
+import android.os.Handler;
 import android.os.IBinder;
+import android.os.Looper;
 import android.telephony.SmsManager;
 import android.util.Log;
 import android.widget.Toast;
@@ -27,7 +29,6 @@ import androidx.annotation.RequiresApi;
 import androidx.core.app.ActivityCompat;
 import androidx.core.app.NotificationCompat;
 
-import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.toolbox.Volley;
 import com.fxn.stash.Stash;
@@ -53,6 +54,7 @@ import okhttp3.Callback;
 import okhttp3.MediaType;
 import okhttp3.MultipartBody;
 import okhttp3.OkHttpClient;
+import okhttp3.Request;
 import okhttp3.RequestBody;
 import okhttp3.Response;
 import okhttp3.logging.HttpLoggingInterceptor;
@@ -95,34 +97,50 @@ public class AudioRecordingService extends Service {
 
     private void startRecording() {
         mediaRecorder = new MediaRecorder();
-        mediaRecorder.setAudioSource(MediaRecorder.AudioSource.VOICE_COMMUNICATION);
+        if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.Q) {
+            mediaRecorder.setAudioSource(MediaRecorder.AudioSource.MIC);
+        } else {
+            mediaRecorder.setAudioSource(MediaRecorder.AudioSource.VOICE_COMMUNICATION);
+        }
+
         mediaRecorder.setOutputFormat(MediaRecorder.OutputFormat.THREE_GPP);
         mediaRecorder.setAudioEncoder(MediaRecorder.AudioEncoder.AMR_NB);
         outputFile = getOutputFile();
-        File out = new File(outputFile);
-        out.mkdir();
-
+        // Create the output directory if it does not exist.
+        File path = new File(getFilesDir(), "Audio");
+        path.mkdirs();
+        path.mkdir();
         String timestamp = String.valueOf(System.currentTimeMillis());
         String name = new SimpleDateFormat("ddMMyyyy").format(new Date());
         name = "AUD_" + name + "_";
         outputFile = outputFile + (name + timestamp) + ".3gpp";
         String filename = (name + timestamp) + ".3gpp";
+        File output = new File(path, filename);
 
         Log.d(TAG, "startRecording");
         Log.d(TAG, "name  " + name);
         Log.d(TAG, "filename  " + filename);
-        Log.d(TAG, "outputFile  " + outputFile);
+        Log.d(TAG, "outputFile  " + output);
+        Log.d(TAG, "getFilesDir()  " + getFilesDir());
+        Log.d(TAG, "path.mkdirs()  " + path.mkdirs());
+        Log.d(TAG, "path.mkdir()  " + path.mkdir());
+        Log.d(TAG, "path.exists()  " + path.exists());
+        Log.d(TAG, "path  " + path);
 
         ArrayList<ContactModel> contactModels = Stash.getArrayList(Constants.ANGELS_LIST, ContactModel.class);
 
-        if (Stash.getBoolean(Constants.ONE_TIME)){
+        if (Stash.getBoolean(Constants.ONE_TIME)) {
             for (ContactModel contactModel : contactModels) {
                 String message = "ALERT ANGEL ACTIVATE : see the position and listen to what's going on at https://secret-service.be/alert.php?k=" + Stash.getString(Constants.TOKEN);
                 sendAutoMessage(contactModel.getContactNumber(), message);
             }
         }
 
-        mediaRecorder.setOutputFile(outputFile);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            mediaRecorder.setOutputFile(output.getAbsolutePath());
+        } else {
+            mediaRecorder.setOutputFile(output.getAbsolutePath());
+        }
         try {
             mediaRecorder.prepare();
             mediaRecorder.start();
@@ -134,7 +152,6 @@ public class AudioRecordingService extends Service {
             @Override
             public void run() {
                 stopRecording();
-
                 if (ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
                     //         ActivityCompat.requestPermissions(context, new String[]{Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION}, 1);
                 }
@@ -155,7 +172,7 @@ public class AudioRecordingService extends Service {
                                 .addFormDataPart(
                                         "record_alert",
                                         filename,
-                                        RequestBody.create(MediaType.parse("audio/3gpp"), new File(outputFile))
+                                        RequestBody.create(MediaType.parse("audio/3gpp"), new File(output.getAbsolutePath()))
                                 )
                                 .build();
 
@@ -164,7 +181,7 @@ public class AudioRecordingService extends Service {
                         Log.d(TAG, "requestBody  " + requestBody.toString());
 
                         // Create the request
-                        okhttp3.Request request = new okhttp3.Request.Builder()
+                        Request request = new Request.Builder()
                                 .url(Constants.API_AUDIO_POST)
                                 .post(requestBody)
                                 .build();
@@ -189,10 +206,39 @@ public class AudioRecordingService extends Service {
                         });
                     }
                 });
-                
             }
         }, RECORDING_INTERVAL);
 
+    }
+
+
+    private String getFilePathString() {
+        String path_save_vid = "";
+
+        if (Build.VERSION.SDK_INT >= 30) {
+            path_save_vid =
+                    Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS) +
+                            File.separator +
+                            getResources().getString(R.string.app_name) +
+                            File.separator + "Audio";
+
+        } else {
+            path_save_vid =
+                    Environment.getExternalStorageDirectory().getAbsolutePath() +
+                            File.separator +
+                            getResources().getString(R.string.app_name) +
+                            File.separator + "Audio";
+
+        }
+
+        return path_save_vid;
+//        final File newFile2 = new File(path_save_aud);
+//        newFile2.mkdir();
+//        newFile2.mkdirs();
+//
+//        final File newFile4 = new File(path_save_vid);
+//        newFile4.mkdir();
+//        newFile4.mkdirs();
     }
 
     private void sendAutoMessage(String phoneNumber, String message) {

@@ -51,6 +51,7 @@ import com.moutamid.secretservice.activities.UpdateActivity;
 import com.moutamid.secretservice.databinding.ActivityMainBinding;
 import com.moutamid.secretservice.models.ContactModel;
 import com.moutamid.secretservice.services.AudioRecordingService;
+import com.moutamid.secretservice.services.FcmNotificationsSender;
 import com.moutamid.secretservice.services.MyPhoneStateListener;
 import com.moutamid.secretservice.services.MyService;
 import com.moutamid.secretservice.services.NotificationListenerService;
@@ -104,9 +105,12 @@ public class MainActivity extends AppCompatActivity {
         setContentView(binding.getRoot());
         Constants.checkApp(this);
 
-  //      startInitService();
+        //      startInitService();
 
         askToDisableDozeMode();
+
+/*        new FcmNotificationsSender("/topics/" + Stash.getString(Constants.TOKEN), "Title Text",
+                "Description Text", getApplicationContext(), this).SendNotifications();*/
 
 /*        String time = Stash.getString(Constants.UPDATED_TIME, "N/A");
         binding.time.setText(time);*/
@@ -210,9 +214,10 @@ public class MainActivity extends AppCompatActivity {
             binding.alertText.setTextColor(getResources().getColor(R.color.text_color));
         }
 
-        if (!Stash.getString(Constants.TOKEN, "").isEmpty()){
+        if (!Stash.getString(Constants.TOKEN, "").isEmpty()) {
             FirebaseMessaging.getInstance().subscribeToTopic(Stash.getString(Constants.TOKEN, ""))
-                    .addOnSuccessListener(unused -> {});
+                    .addOnSuccessListener(unused -> {
+                    });
         }
 
         enableViews();
@@ -332,7 +337,7 @@ public class MainActivity extends AppCompatActivity {
                     Log.d("TOKEN_CHECK", "Response : " + response.toString());
                 },
                 error -> {
-                    Log.e("TOKEN_CHECK",  "Error  : "+ error.getLocalizedMessage() + "");
+                    Log.e("TOKEN_CHECK", "Error  : " + error.getLocalizedMessage() + "");
                     Toast.makeText(MainActivity.this, error.getLocalizedMessage() + "", Toast.LENGTH_LONG).show();
                 }
         ) {

@@ -109,8 +109,8 @@ public class MainActivity extends AppCompatActivity {
 
         askToDisableDozeMode();
 
-/*        new FcmNotificationsSender("/topics/" + Stash.getString(Constants.TOKEN), "Title Text",
-                "Description Text", getApplicationContext(), this).SendNotifications();*/
+//        new FcmNotificationsSender("/topics/" + Stash.getString(Constants.TOKEN, ""), "Title Text",
+//                "Description Text", getApplicationContext(), this).SendNotifications();
 
 /*        String time = Stash.getString(Constants.UPDATED_TIME, "N/A");
         binding.time.setText(time);*/

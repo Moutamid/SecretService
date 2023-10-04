@@ -12,6 +12,7 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Vibrator;
 import android.util.Log;
+import android.widget.Toast;
 
 import androidx.core.app.NotificationCompat;
 
@@ -53,12 +54,12 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
             Log.d("MyFirebaseMessagingService", "body \t\t" + body);
             Log.d("MyFirebaseMessagingService", "link \t\t" + link);
 
+
             pendingIntent = createPendingIntent(link);
 
             int priority = remoteMessage.getPriority();
 
             Log.d("MyFirebaseMessagingService", "priority \t\t" + priority);
-
 
             Ringtone r = RingtoneManager.getRingtone(getApplicationContext(), RingtoneManager.getDefaultUri(2));
             r.play();
@@ -89,6 +90,6 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
 
     private PendingIntent createPendingIntent(String link) {
         Intent linkIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(link));
-        return PendingIntent.getActivity(this, 0, linkIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+        return PendingIntent.getActivity(this, 0, linkIntent, PendingIntent.FLAG_IMMUTABLE);
     }
 }

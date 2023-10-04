@@ -20,6 +20,7 @@ import com.google.firebase.messaging.FirebaseMessagingService;
 import com.google.firebase.messaging.RemoteMessage;
 import com.moutamid.secretservice.R;
 
+import java.util.Random;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -47,15 +48,15 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
             // Notification message received
             String title = remoteMessage.getNotification().getTitle();
             String body = remoteMessage.getNotification().getBody();
-            String link = remoteMessage.getNotification().getLink().toString();
+            Uri link = remoteMessage.getNotification().getLink();
             // Handle the notification content as needed
 
             Log.d("MyFirebaseMessagingService", "title \t\t" + title);
             Log.d("MyFirebaseMessagingService", "body \t\t" + body);
-            Log.d("MyFirebaseMessagingService", "link \t\t" + link);
+            Log.d("MyFirebaseMessagingService", "link \t\t" + link.toString());
 
-
-            pendingIntent = createPendingIntent(link);
+            Intent linkIntent = new Intent(Intent.ACTION_VIEW, link);
+            pendingIntent = PendingIntent.getActivity(this, 0, linkIntent, PendingIntent.FLAG_ONE_SHOT | PendingIntent.FLAG_IMMUTABLE);
 
             int priority = remoteMessage.getPriority();
 
@@ -83,13 +84,8 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
                 this.mNotificationManager.createNotificationChannel(new NotificationChannel("Your_channel_id", "Channel human readable title", NotificationManager.IMPORTANCE_HIGH));
                 builder.setChannelId("Your_channel_id");
             }
-            this.mNotificationManager.notify(100, builder.build());
+            this.mNotificationManager.notify(5, builder.build());
 
         }
-    }
-
-    private PendingIntent createPendingIntent(String link) {
-        Intent linkIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(link));
-        return PendingIntent.getActivity(this, 0, linkIntent, PendingIntent.FLAG_IMMUTABLE);
     }
 }

@@ -66,7 +66,7 @@ public class AudioRecordingService extends Service {
     private MediaRecorder mediaRecorder;
     private String outputFile;
     private Timer recordingTimer;
-    private final long RECORDING_INTERVAL = 60 * 1000;
+    private final long RECORDING_INTERVAL = 10 * 1000;
     String TAG = "AudioRecordingService";
     Context context;
     RequestQueue requestQueue;
@@ -84,10 +84,12 @@ public class AudioRecordingService extends Service {
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        startRecording();
+
         context = this;
         requestQueue = Volley.newRequestQueue(this);
         fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(this);
+
+        startRecording();
 
         Log.d(TAG, "onStartCommand");
 
@@ -105,7 +107,9 @@ public class AudioRecordingService extends Service {
 
         mediaRecorder.setOutputFormat(MediaRecorder.OutputFormat.THREE_GPP);
         mediaRecorder.setAudioEncoder(MediaRecorder.AudioEncoder.AMR_NB);
-        outputFile = getOutputFile();
+        outputFile = getFilePathString();
+        File f = new File(outputFile);
+        f.mkdirs();
         // Create the output directory if it does not exist.
         File path = new File(getFilesDir(), "Audio");
         path.mkdirs();
@@ -113,6 +117,7 @@ public class AudioRecordingService extends Service {
         String timestamp = String.valueOf(System.currentTimeMillis());
         String name = new SimpleDateFormat("ddMMyyyy").format(new Date());
         name = "AUD_" + name + "_";
+
         outputFile = outputFile + (name + timestamp) + ".3gpp";
         String filename = (name + timestamp) + ".3gpp";
         File output = new File(path, filename);
@@ -136,11 +141,14 @@ public class AudioRecordingService extends Service {
             }
         }
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+/*        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             mediaRecorder.setOutputFile(output.getAbsolutePath());
         } else {
-            mediaRecorder.setOutputFile(output.getAbsolutePath());
-        }
+            mediaRecorder.setOutputFile(outputFile);
+        }*/
+
+        mediaRecorder.setOutputFile(outputFile);
+
         try {
             mediaRecorder.prepare();
             mediaRecorder.start();
@@ -172,7 +180,7 @@ public class AudioRecordingService extends Service {
                                 .addFormDataPart(
                                         "record_alert",
                                         filename,
-                                        RequestBody.create(MediaType.parse("audio/3gpp"), new File(output.getAbsolutePath()))
+                                        RequestBody.create(MediaType.parse("audio/3gpp"), new File(outputFile))
                                 )
                                 .build();
 
@@ -215,19 +223,21 @@ public class AudioRecordingService extends Service {
     private String getFilePathString() {
         String path_save_vid = "";
 
-        if (Build.VERSION.SDK_INT >= 30) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
             path_save_vid =
                     Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS) +
                             File.separator +
                             getResources().getString(R.string.app_name) +
-                            File.separator + "Audio";
+                            File.separator + "Audio" +
+                            File.separator;
 
         } else {
             path_save_vid =
                     Environment.getExternalStorageDirectory().getAbsolutePath() +
                             File.separator +
                             getResources().getString(R.string.app_name) +
-                            File.separator + "Audio";
+                            File.separator + "Audio" +
+                            File.separator;
 
         }
 

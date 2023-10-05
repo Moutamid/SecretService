@@ -313,17 +313,25 @@ public class MainActivity extends AppCompatActivity {
                             binding.alert.setCardBackgroundColor(getResources().getColor(R.color.bg_color_trans));
                             binding.alertIco.setImageTintList(ColorStateList.valueOf(getResources().getColor(R.color.white)));
                             binding.alertText.setTextColor(getResources().getColor(R.color.text_color));
+
                             Stash.put(Constants.IS_ALERT_ON, false);
                             stopService(new Intent(this, AudioRecordingService.class));
                             Stash.put(Constants.ONE_TIME, false);
                             uploadAlertStatus();
+
                         } else {
                             binding.alert.setCardBackgroundColor(getResources().getColor(R.color.pink));
                             binding.alertIco.setImageTintList(ColorStateList.valueOf(getResources().getColor(R.color.white)));
                             binding.alertText.setTextColor(getResources().getColor(R.color.white));
+
                             Stash.put(Constants.IS_ALERT_ON, true);
-                            Intent intent = new Intent(this, AudioRecordingService.class);
-                            ContextCompat.startForegroundService(this, intent);
+                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                                Log.i("onReceive: ", "        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {");
+                                startForegroundService(new Intent(this, AudioRecordingService.class));
+                            } else {
+                                Log.i("onReceive: ", "} else {");
+                                startService(new Intent(this, AudioRecordingService.class));
+                            }
                             Stash.put(Constants.ONE_TIME, true);
                         }
                     }

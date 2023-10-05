@@ -31,7 +31,7 @@ public class FcmNotificationsSender {
     String userFcmToken;
 
     public FcmNotificationsSender(String userFcmToken2, String title2, String body2, Context mContext2, Activity mActivity2) {
-        fcmServerKey = "AAAAuA4EMpI:APA91bG-59yr40--p-mwduE6gclYUlKOqo5cz-Mi7xFhSnEBf9UDuLShjaXpD2bLIZbnYChs0lrX28_7ODyLMA8d1_ed6NEL2wKy6vMpGk67uuEwci3tTvWDybF3OT0ShHP8TnKEasRN"; // Server Key
+        fcmServerKey = ""; // Server Key
         this.userFcmToken = userFcmToken2;
         this.title = title2;
         this.body = body2;
@@ -44,10 +44,12 @@ public class FcmNotificationsSender {
         JSONObject mainObj = new JSONObject();
         try {
             mainObj.put("to", this.userFcmToken);
+
             JSONObject notiObject = new JSONObject();
             notiObject.put("title", this.title);
             notiObject.put("body", this.body);
             notiObject.put("link", "https://google.com");
+
             mainObj.put("notification", notiObject);
             mainObj.put("priority", "high");
             this.requestQueue.add(new JsonObjectRequest(Request.Method.POST, "https://fcm.googleapis.com/fcm/send", mainObj, new Response.Listener<JSONObject>() {

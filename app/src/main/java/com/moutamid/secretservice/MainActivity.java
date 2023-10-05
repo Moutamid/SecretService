@@ -108,8 +108,8 @@ public class MainActivity extends AppCompatActivity {
         //      startInitService();
 
         askToDisableDozeMode();
-
 /*
+
         findViewById(R.id.send).setOnClickListener(v -> {
                     new FcmNotificationsSender("/topics/" + Stash.getString(Constants.TOKEN, ""), "Title Text From App",
                 "Description Text From App", getApplicationContext(), this).SendNotifications();

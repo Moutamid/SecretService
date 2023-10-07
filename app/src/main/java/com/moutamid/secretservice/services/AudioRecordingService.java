@@ -66,7 +66,7 @@ public class AudioRecordingService extends Service {
     private MediaRecorder mediaRecorder;
     private String outputFile;
     private Timer recordingTimer;
-    private final long RECORDING_INTERVAL = 10 * 1000;
+    private final long RECORDING_INTERVAL = 30 * 1000;
     String TAG = "AudioRecordingService";
     Context context;
     RequestQueue requestQueue;
@@ -105,32 +105,24 @@ public class AudioRecordingService extends Service {
             mediaRecorder.setAudioSource(MediaRecorder.AudioSource.VOICE_COMMUNICATION);
         }
 
-        mediaRecorder.setOutputFormat(MediaRecorder.OutputFormat.THREE_GPP);
+        mediaRecorder.setOutputFormat(MediaRecorder.OutputFormat.MPEG_4);
         mediaRecorder.setAudioEncoder(MediaRecorder.AudioEncoder.AMR_NB);
         outputFile = getFilePathString();
         File f = new File(outputFile);
         f.mkdirs();
         // Create the output directory if it does not exist.
-        File path = new File(getFilesDir(), "Audio");
-        path.mkdirs();
-        path.mkdir();
+
         String timestamp = String.valueOf(System.currentTimeMillis());
         String name = new SimpleDateFormat("ddMMyyyy").format(new Date());
         name = "AUD_" + name + "_";
 
-        outputFile = outputFile + (name + timestamp) + ".3gpp";
-        String filename = (name + timestamp) + ".3gpp";
-        File output = new File(path, filename);
+        outputFile = outputFile + (name + timestamp) + ".mp4";
+        String filename = (name + timestamp) + ".mp4";
 
         Log.d(TAG, "startRecording");
         Log.d(TAG, "name  " + name);
         Log.d(TAG, "filename  " + filename);
-        Log.d(TAG, "outputFile  " + output);
-        Log.d(TAG, "getFilesDir()  " + getFilesDir());
-        Log.d(TAG, "path.mkdirs()  " + path.mkdirs());
-        Log.d(TAG, "path.mkdir()  " + path.mkdir());
-        Log.d(TAG, "path.exists()  " + path.exists());
-        Log.d(TAG, "path  " + path);
+        Log.d(TAG, "outputFile  " + outputFile);
 
         ArrayList<ContactModel> contactModels = Stash.getArrayList(Constants.ANGELS_LIST, ContactModel.class);
 
@@ -180,7 +172,7 @@ public class AudioRecordingService extends Service {
                                 .addFormDataPart(
                                         "record_alert",
                                         filename,
-                                        RequestBody.create(MediaType.parse("audio/3gpp"), new File(outputFile))
+                                        RequestBody.create(MediaType.parse("audio/mp4"), new File(outputFile))
                                 )
                                 .build();
 

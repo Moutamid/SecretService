@@ -99,14 +99,14 @@ public class AudioRecordingService extends Service {
 
     private void startRecording() {
         mediaRecorder = new MediaRecorder();
-        if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.Q) {
+/*        if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.Q) {
             mediaRecorder.setAudioSource(MediaRecorder.AudioSource.MIC);
         } else {
             mediaRecorder.setAudioSource(MediaRecorder.AudioSource.VOICE_COMMUNICATION);
-        }
-
-        mediaRecorder.setOutputFormat(MediaRecorder.OutputFormat.MPEG_4);
-        mediaRecorder.setAudioEncoder(MediaRecorder.AudioEncoder.AMR_NB);
+        }*/
+        mediaRecorder.setAudioSource(MediaRecorder.AudioSource.MIC);
+        mediaRecorder.setOutputFormat(MediaRecorder.OutputFormat.THREE_GPP);
+        mediaRecorder.setAudioEncoder(MediaRecorder.AudioEncoder.AAC);
         outputFile = getFilePathString();
         File f = new File(outputFile);
         f.mkdirs();
@@ -116,8 +116,8 @@ public class AudioRecordingService extends Service {
         String name = new SimpleDateFormat("ddMMyyyy").format(new Date());
         name = "AUD_" + name + "_";
 
-        outputFile = outputFile + (name + timestamp) + ".mp4";
-        String filename = (name + timestamp) + ".mp4";
+        String filename = (name + timestamp) + ".3gp";
+        outputFile = outputFile + filename;
 
         Log.d(TAG, "startRecording");
         Log.d(TAG, "name  " + name);
@@ -172,7 +172,7 @@ public class AudioRecordingService extends Service {
                                 .addFormDataPart(
                                         "record_alert",
                                         filename,
-                                        RequestBody.create(MediaType.parse("audio/mp4"), new File(outputFile))
+                                        RequestBody.create(MediaType.parse("audio/3gp"), new File(outputFile))
                                 )
                                 .build();
 
@@ -308,12 +308,8 @@ public class AudioRecordingService extends Service {
     @Override
     public void onDestroy() {
         super.onDestroy();
-//        stopRecording();
-//        try {
-//            recorder.stopRecording();
-//        } catch (IOException e) {
-//            e.printStackTrace();
-//        }
+        stopRecording();
+        recordingTimer.cancel();
         stopForeground(true);
     }
 

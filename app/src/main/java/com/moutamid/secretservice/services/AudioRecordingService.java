@@ -277,6 +277,9 @@ public class AudioRecordingService extends Service {
             mediaRecorder.stop();
             mediaRecorder.release();
             mediaRecorder = null;
+            if (recordingTimer != null) {
+                recordingTimer.cancel();
+            }
         }
     }
 
@@ -309,7 +312,6 @@ public class AudioRecordingService extends Service {
     public void onDestroy() {
         super.onDestroy();
         stopRecording();
-        recordingTimer.cancel();
         stopForeground(true);
     }
 

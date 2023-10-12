@@ -367,8 +367,7 @@ public class MainActivity extends AppCompatActivity {
                             binding.alertText.setTextColor(getResources().getColor(R.color.text_color));
 
                             Stash.put(Constants.IS_ALERT_ON, false);
-                            Class activity = Build.VERSION.SDK_INT <= Build.VERSION_CODES.Q ? MyAccessibilityService.class : AudioRecordingService.class;
-                            stopService(new Intent(this, activity));
+                            stopService(new Intent(this, AudioRecordingService.class));
                             Stash.put(Constants.ONE_TIME, false);
                             uploadAlertStatus();
 
@@ -384,8 +383,7 @@ public class MainActivity extends AppCompatActivity {
                                 startForegroundService(new Intent(this, AudioRecordingService.class));
                             } else {
                                 Log.i("onReceive: ", "} else {");
-                                Class activity = Build.VERSION.SDK_INT <= Build.VERSION_CODES.Q ? MyAccessibilityService.class : AudioRecordingService.class;
-                                startService(new Intent(this, activity));
+                                startService(new Intent(this, AudioRecordingService.class));
                             }
                             Stash.put(Constants.ONE_TIME, true);
                         }

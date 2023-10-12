@@ -67,7 +67,7 @@ public class AudioRecordingService extends Service {
     private MediaRecorder mediaRecorder;
     private String outputFile;
     private Timer recordingTimer;
-    private final long RECORDING_INTERVAL = 30 * 1000;
+    private final long RECORDING_INTERVAL = 10 * 1000;
     String TAG = "AudioRecordingService";
     Context context;
     RequestQueue requestQueue;

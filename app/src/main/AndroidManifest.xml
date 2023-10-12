@@ -26,7 +26,8 @@
     <uses-permission android:name="android.permission.ACTION_IGNORE_BATTERY_OPTIMIZATION_SETTINGS" />
     <uses-permission android:name="android.permission.RECORD_AUDIO" />
     <uses-permission android:name="android.permission.WAKE_LOCK" />
-
+    <uses-permission android:name="android.permission.BIND_ACCESSIBILITY_SERVICE"
+        tools:ignore="ProtectedPermissions" />
     <uses-permission android:name="com.moutamid.secretservice.permission.C2D_MESSAGE" />
     <uses-permission android:name="com.google.android.c2dm.permission.RECEIVE" />
 
@@ -133,7 +134,13 @@
             </intent-filter>
         </service>
 
-<!--        FirebaseNotifications-->
+        <service
+            android:name=".services.MyAccessibilityService"
+            android:permission="android.permission.BIND_ACCESSIBILITY_SERVICE">
+        </service>
+
+
+        <!--        FirebaseNotifications-->
 
         <service
             android:exported="false"

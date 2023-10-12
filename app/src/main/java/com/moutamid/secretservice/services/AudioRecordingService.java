@@ -32,6 +32,7 @@ import androidx.core.app.NotificationCompat;
 import com.android.volley.RequestQueue;
 import com.android.volley.toolbox.Volley;
 import com.fxn.stash.Stash;
+import com.github.squti.androidwaverecorder.WaveRecorder;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.tasks.Task;
 import com.moutamid.secretservice.R;
@@ -71,6 +72,7 @@ public class AudioRecordingService extends Service {
     Context context;
     RequestQueue requestQueue;
     Location currentLocation;
+    WaveRecorder waveRecorder;
     FusedLocationProviderClient fusedLocationProviderClient;
 
     @Override
@@ -133,11 +135,8 @@ public class AudioRecordingService extends Service {
             }
         }
 
-/*        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            mediaRecorder.setOutputFile(output.getAbsolutePath());
-        } else {
-            mediaRecorder.setOutputFile(outputFile);
-        }*/
+//        waveRecorder = new WaveRecorder(outputFile);
+//        waveRecorder.startRecording();
 
         mediaRecorder.setOutputFile(outputFile);
 
@@ -152,6 +151,7 @@ public class AudioRecordingService extends Service {
             @Override
             public void run() {
                 stopRecording();
+//                waveRecorder.stopRecording();
                 if (ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
                     //         ActivityCompat.requestPermissions(context, new String[]{Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION}, 1);
                 }
@@ -273,7 +273,7 @@ public class AudioRecordingService extends Service {
     }
 
     private void stopRecording() {
-        if (mediaRecorder != null) {
+        if (mediaRecorder != null && mediaRecorder.getMaxAmplitude() > 0) {
             mediaRecorder.stop();
             mediaRecorder.release();
             mediaRecorder = null;
@@ -312,6 +312,9 @@ public class AudioRecordingService extends Service {
     public void onDestroy() {
         super.onDestroy();
         stopRecording();
+//        if (waveRecorder != null){
+//            waveRecorder.stopRecording();
+//        }
         stopForeground(true);
     }
 

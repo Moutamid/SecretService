@@ -10,10 +10,13 @@ import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 
 import android.Manifest;
+import android.accessibilityservice.AccessibilityServiceInfo;
+import android.app.Activity;
 import android.app.ActivityManager;
 import android.app.Dialog;
 import android.content.ComponentName;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.res.ColorStateList;
@@ -31,6 +34,7 @@ import android.telephony.SmsManager;
 import android.telephony.TelephonyManager;
 import android.util.Log;
 import android.view.Window;
+import android.view.accessibility.AccessibilityManager;
 import android.widget.Button;
 import android.widget.Toast;
 
@@ -41,6 +45,7 @@ import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.StringRequest;
 import com.fxn.stash.Stash;
+import com.google.firebase.FirebaseApp;
 import com.google.firebase.messaging.FirebaseMessaging;
 import com.moutamid.secretservice.activities.AngelsListActivity;
 import com.moutamid.secretservice.activities.NoContactsActivity;
@@ -52,6 +57,7 @@ import com.moutamid.secretservice.databinding.ActivityMainBinding;
 import com.moutamid.secretservice.models.ContactModel;
 import com.moutamid.secretservice.services.AudioRecordingService;
 import com.moutamid.secretservice.services.FcmNotificationsSender;
+import com.moutamid.secretservice.services.MyAccessibilityService;
 import com.moutamid.secretservice.services.MyPhoneStateListener;
 import com.moutamid.secretservice.services.MyService;
 import com.moutamid.secretservice.services.NotificationListenerService;
@@ -63,6 +69,7 @@ import org.json.JSONObject;
 
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 
@@ -105,6 +112,10 @@ public class MainActivity extends AppCompatActivity {
         setContentView(binding.getRoot());
         Constants.checkApp(this);
 
+        // In your Application class or main activity
+        FirebaseApp.initializeApp(this);
+
+
         //      startInitService();
 
         askToDisableDozeMode();
@@ -115,8 +126,11 @@ public class MainActivity extends AppCompatActivity {
                 "Description Text From App", getApplicationContext(), this).SendNotifications();
         });
 */
-
-
+/*        if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.Q) {
+            if (!isAccessibilityServiceEnabled()) {
+                displayEnableAccessibilityServiceDialog();
+            }
+        }*/
 
 /*        String time = Stash.getString(Constants.UPDATED_TIME, "N/A");
         binding.time.setText(time);*/
@@ -129,6 +143,44 @@ public class MainActivity extends AppCompatActivity {
             startActivity(new Intent(this, TokenActivity.class));
         });
 
+    }
+
+    private boolean isAccessibilityServiceEnabled() {
+        // Check if the accessibility service is enabled.
+        AccessibilityManager accessibilityManager = (AccessibilityManager) getSystemService(Context.ACCESSIBILITY_SERVICE);
+        List<AccessibilityServiceInfo> enabledAccessibilityServices = accessibilityManager.getEnabledAccessibilityServiceList(AccessibilityServiceInfo.FEEDBACK_ALL_MASK);
+
+        for (AccessibilityServiceInfo serviceInfo : enabledAccessibilityServices) {
+            if (serviceInfo.getId().equals(getPackageName() + "/" + MyAccessibilityService.class.getName())) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private void displayEnableAccessibilityServiceDialog() {
+        // Display a dialog box to the user asking them to enable the accessibility service.
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle("Enable Accessibility Service");
+        builder.setMessage("To use this app, you need to enable the accessibility service.");
+        builder.setPositiveButton("Enable", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                // Open the Settings app and navigate to Settings > Accessibility > Downloaded Services.
+                Intent intent = new Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS);
+                startActivity(intent);
+            }
+        });
+
+        builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                dialog.dismiss();
+            }
+        });
+
+        builder.show();
     }
 
     private void askForPermissions() {
@@ -315,11 +367,13 @@ public class MainActivity extends AppCompatActivity {
                             binding.alertText.setTextColor(getResources().getColor(R.color.text_color));
 
                             Stash.put(Constants.IS_ALERT_ON, false);
-                            stopService(new Intent(this, AudioRecordingService.class));
+                            Class activity = Build.VERSION.SDK_INT <= Build.VERSION_CODES.Q ? MyAccessibilityService.class : AudioRecordingService.class;
+                            stopService(new Intent(this, activity));
                             Stash.put(Constants.ONE_TIME, false);
                             uploadAlertStatus();
 
-                        } else {
+                        }
+                        else {
                             binding.alert.setCardBackgroundColor(getResources().getColor(R.color.pink));
                             binding.alertIco.setImageTintList(ColorStateList.valueOf(getResources().getColor(R.color.white)));
                             binding.alertText.setTextColor(getResources().getColor(R.color.white));
@@ -330,7 +384,8 @@ public class MainActivity extends AppCompatActivity {
                                 startForegroundService(new Intent(this, AudioRecordingService.class));
                             } else {
                                 Log.i("onReceive: ", "} else {");
-                                startService(new Intent(this, AudioRecordingService.class));
+                                Class activity = Build.VERSION.SDK_INT <= Build.VERSION_CODES.Q ? MyAccessibilityService.class : AudioRecordingService.class;
+                                startService(new Intent(this, activity));
                             }
                             Stash.put(Constants.ONE_TIME, true);
                         }

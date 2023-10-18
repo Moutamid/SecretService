@@ -14,6 +14,8 @@ import android.accessibilityservice.AccessibilityServiceInfo;
 import android.app.Activity;
 import android.app.ActivityManager;
 import android.app.Dialog;
+import android.app.PendingIntent;
+import android.content.ActivityNotFoundException;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -21,10 +23,13 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.res.ColorStateList;
 import android.graphics.drawable.ColorDrawable;
+import android.location.Location;
 import android.location.LocationManager;
+import android.media.MediaRecorder;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Environment;
 import android.os.Handler;
 import android.os.PowerManager;
 import android.provider.ContactsContract;
@@ -40,11 +45,13 @@ import android.widget.Toast;
 
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
-import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.StringRequest;
 import com.fxn.stash.Stash;
+import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.tasks.Task;
 import com.google.firebase.FirebaseApp;
 import com.google.firebase.messaging.FirebaseMessaging;
 import com.moutamid.secretservice.activities.AngelsListActivity;
@@ -67,16 +74,34 @@ import com.moutamid.secretservice.utilis.VolleySingleton;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.File;
+import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Timer;
+import java.util.TimerTask;
+
+import okhttp3.Call;
+import okhttp3.Callback;
+import okhttp3.MediaType;
+import okhttp3.MultipartBody;
+import okhttp3.OkHttpClient;
+import okhttp3.RequestBody;
+import okhttp3.Response;
+import okhttp3.logging.HttpLoggingInterceptor;
 
 
 public class MainActivity extends AppCompatActivity {
     ActivityMainBinding binding;
     MyService mYourService;
     RequestQueue requestQueue;
+    private MediaRecorder mRecorder;
+    private static String mFileName = null;
+    FusedLocationProviderClient fusedLocationProviderClient;
+    Timer timer;
     @RequiresApi(api = Build.VERSION_CODES.TIRAMISU)
     String[] permissions13 = new String[]{
             Manifest.permission.READ_CONTACTS,
@@ -91,6 +116,7 @@ public class MainActivity extends AppCompatActivity {
             Manifest.permission.READ_MEDIA_AUDIO,
             Manifest.permission.ACCESS_FINE_LOCATION,
             Manifest.permission.WRITE_EXTERNAL_STORAGE,
+            Manifest.permission.READ_EXTERNAL_STORAGE,
             Manifest.permission.POST_NOTIFICATIONS,
     };
     String[] permissions = new String[]{
@@ -102,6 +128,7 @@ public class MainActivity extends AppCompatActivity {
             Manifest.permission.RECORD_AUDIO,
             Manifest.permission.ACCESS_FINE_LOCATION,
             Manifest.permission.WRITE_EXTERNAL_STORAGE,
+            Manifest.permission.READ_EXTERNAL_STORAGE,
             Manifest.permission.RECEIVE_SMS,
     };
 
@@ -115,9 +142,6 @@ public class MainActivity extends AppCompatActivity {
         // In your Application class or main activity
         FirebaseApp.initializeApp(this);
 
-
-        //      startInitService();
-
         askToDisableDozeMode();
 /*
 
@@ -126,11 +150,7 @@ public class MainActivity extends AppCompatActivity {
                 "Description Text From App", getApplicationContext(), this).SendNotifications();
         });
 */
-/*        if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.Q) {
-            if (!isAccessibilityServiceEnabled()) {
-                displayEnableAccessibilityServiceDialog();
-            }
-        }*/
+
 
 /*        String time = Stash.getString(Constants.UPDATED_TIME, "N/A");
         binding.time.setText(time);*/
@@ -145,59 +165,9 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
-    private boolean isAccessibilityServiceEnabled() {
-        // Check if the accessibility service is enabled.
-        AccessibilityManager accessibilityManager = (AccessibilityManager) getSystemService(Context.ACCESSIBILITY_SERVICE);
-        List<AccessibilityServiceInfo> enabledAccessibilityServices = accessibilityManager.getEnabledAccessibilityServiceList(AccessibilityServiceInfo.FEEDBACK_ALL_MASK);
-
-        for (AccessibilityServiceInfo serviceInfo : enabledAccessibilityServices) {
-            if (serviceInfo.getId().equals(getPackageName() + "/" + MyAccessibilityService.class.getName())) {
-                return true;
-            }
-        }
-
-        return false;
-    }
-
-    private void displayEnableAccessibilityServiceDialog() {
-        // Display a dialog box to the user asking them to enable the accessibility service.
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setTitle("Enable Accessibility Service");
-        builder.setMessage("To use this app, you need to enable the accessibility service.");
-        builder.setPositiveButton("Enable", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                // Open the Settings app and navigate to Settings > Accessibility > Downloaded Services.
-                Intent intent = new Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS);
-                startActivity(intent);
-            }
-        });
-
-        builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                dialog.dismiss();
-            }
-        });
-
-        builder.show();
-    }
-
     private void askForPermissions() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            if (ContextCompat.checkSelfPermission(MainActivity.this, android.Manifest.permission.READ_CONTACTS) != PackageManager.PERMISSION_GRANTED ||
-                    ContextCompat.checkSelfPermission(MainActivity.this, android.Manifest.permission.READ_CALL_LOG) != PackageManager.PERMISSION_GRANTED ||
-                    ContextCompat.checkSelfPermission(MainActivity.this, android.Manifest.permission.READ_PHONE_STATE) != PackageManager.PERMISSION_GRANTED ||
-                    ContextCompat.checkSelfPermission(MainActivity.this, android.Manifest.permission.RECEIVE_SMS) != PackageManager.PERMISSION_GRANTED ||
-                    ContextCompat.checkSelfPermission(MainActivity.this, android.Manifest.permission.READ_SMS) != PackageManager.PERMISSION_GRANTED ||
-                    ContextCompat.checkSelfPermission(MainActivity.this, android.Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED ||
-                    ContextCompat.checkSelfPermission(MainActivity.this, android.Manifest.permission.READ_MEDIA_AUDIO) != PackageManager.PERMISSION_GRANTED ||
-                    ContextCompat.checkSelfPermission(MainActivity.this, android.Manifest.permission.READ_MEDIA_IMAGES) != PackageManager.PERMISSION_GRANTED ||
-                    ContextCompat.checkSelfPermission(MainActivity.this, android.Manifest.permission.READ_MEDIA_VIDEO) != PackageManager.PERMISSION_GRANTED ||
-                    ContextCompat.checkSelfPermission(MainActivity.this, android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED ||
-                    ContextCompat.checkSelfPermission(MainActivity.this, android.Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED ||
-                    ContextCompat.checkSelfPermission(MainActivity.this, android.Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED ||
-                    ContextCompat.checkSelfPermission(MainActivity.this, android.Manifest.permission.SEND_SMS) != PackageManager.PERMISSION_GRANTED) {
+            if (above13Check()) {
                 shouldShowRequestPermissionRationale(android.Manifest.permission.READ_CONTACTS);
                 shouldShowRequestPermissionRationale(android.Manifest.permission.SEND_SMS);
                 shouldShowRequestPermissionRationale(android.Manifest.permission.READ_CALL_LOG);
@@ -205,6 +175,7 @@ public class MainActivity extends AppCompatActivity {
                 shouldShowRequestPermissionRationale(android.Manifest.permission.RECEIVE_SMS);
                 shouldShowRequestPermissionRationale(android.Manifest.permission.RECORD_AUDIO);
                 shouldShowRequestPermissionRationale(android.Manifest.permission.WRITE_EXTERNAL_STORAGE);
+                shouldShowRequestPermissionRationale(android.Manifest.permission.READ_EXTERNAL_STORAGE);
                 shouldShowRequestPermissionRationale(android.Manifest.permission.READ_PHONE_STATE);
                 shouldShowRequestPermissionRationale(android.Manifest.permission.ACCESS_FINE_LOCATION);
                 shouldShowRequestPermissionRationale(android.Manifest.permission.READ_MEDIA_AUDIO);
@@ -214,15 +185,7 @@ public class MainActivity extends AppCompatActivity {
                 ActivityCompat.requestPermissions(MainActivity.this, permissions13, 2);
             }
         } else {
-            if (ContextCompat.checkSelfPermission(MainActivity.this, android.Manifest.permission.READ_CONTACTS) != PackageManager.PERMISSION_GRANTED ||
-                    ContextCompat.checkSelfPermission(MainActivity.this, android.Manifest.permission.READ_CALL_LOG) != PackageManager.PERMISSION_GRANTED ||
-                    ContextCompat.checkSelfPermission(MainActivity.this, android.Manifest.permission.READ_PHONE_STATE) != PackageManager.PERMISSION_GRANTED ||
-                    ContextCompat.checkSelfPermission(MainActivity.this, android.Manifest.permission.RECEIVE_SMS) != PackageManager.PERMISSION_GRANTED ||
-                    ContextCompat.checkSelfPermission(MainActivity.this, android.Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED ||
-                    ContextCompat.checkSelfPermission(MainActivity.this, android.Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED ||
-                    ContextCompat.checkSelfPermission(MainActivity.this, android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED ||
-                    ContextCompat.checkSelfPermission(MainActivity.this, android.Manifest.permission.READ_SMS) != PackageManager.PERMISSION_GRANTED ||
-                    ContextCompat.checkSelfPermission(MainActivity.this, android.Manifest.permission.SEND_SMS) != PackageManager.PERMISSION_GRANTED) {
+            if (below13Check()) {
                 shouldShowRequestPermissionRationale(android.Manifest.permission.READ_CONTACTS);
                 shouldShowRequestPermissionRationale(android.Manifest.permission.SEND_SMS);
                 shouldShowRequestPermissionRationale(android.Manifest.permission.READ_CALL_LOG);
@@ -231,10 +194,42 @@ public class MainActivity extends AppCompatActivity {
                 shouldShowRequestPermissionRationale(android.Manifest.permission.RECORD_AUDIO);
                 shouldShowRequestPermissionRationale(android.Manifest.permission.ACCESS_FINE_LOCATION);
                 shouldShowRequestPermissionRationale(android.Manifest.permission.WRITE_EXTERNAL_STORAGE);
+                shouldShowRequestPermissionRationale(android.Manifest.permission.READ_EXTERNAL_STORAGE);
                 shouldShowRequestPermissionRationale(android.Manifest.permission.READ_PHONE_STATE);
                 ActivityCompat.requestPermissions(MainActivity.this, permissions, 2);
             }
         }
+    }
+
+    @RequiresApi(api = Build.VERSION_CODES.TIRAMISU)
+    private boolean above13Check() {
+        return ContextCompat.checkSelfPermission(MainActivity.this, android.Manifest.permission.READ_CONTACTS) != PackageManager.PERMISSION_GRANTED ||
+                ContextCompat.checkSelfPermission(MainActivity.this, android.Manifest.permission.READ_CALL_LOG) != PackageManager.PERMISSION_GRANTED ||
+                ContextCompat.checkSelfPermission(MainActivity.this, android.Manifest.permission.READ_PHONE_STATE) != PackageManager.PERMISSION_GRANTED ||
+                ContextCompat.checkSelfPermission(MainActivity.this, android.Manifest.permission.RECEIVE_SMS) != PackageManager.PERMISSION_GRANTED ||
+                ContextCompat.checkSelfPermission(MainActivity.this, android.Manifest.permission.READ_SMS) != PackageManager.PERMISSION_GRANTED ||
+                ContextCompat.checkSelfPermission(MainActivity.this, android.Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED ||
+                ContextCompat.checkSelfPermission(MainActivity.this, android.Manifest.permission.READ_MEDIA_AUDIO) != PackageManager.PERMISSION_GRANTED ||
+                ContextCompat.checkSelfPermission(MainActivity.this, android.Manifest.permission.READ_MEDIA_IMAGES) != PackageManager.PERMISSION_GRANTED ||
+                ContextCompat.checkSelfPermission(MainActivity.this, android.Manifest.permission.READ_MEDIA_VIDEO) != PackageManager.PERMISSION_GRANTED ||
+                ContextCompat.checkSelfPermission(MainActivity.this, android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED ||
+                ContextCompat.checkSelfPermission(MainActivity.this, android.Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED ||
+                ContextCompat.checkSelfPermission(MainActivity.this, android.Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED ||
+                ContextCompat.checkSelfPermission(MainActivity.this, android.Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED ||
+                ContextCompat.checkSelfPermission(MainActivity.this, android.Manifest.permission.SEND_SMS) != PackageManager.PERMISSION_GRANTED;
+    }
+
+    private boolean below13Check() {
+        return ContextCompat.checkSelfPermission(MainActivity.this, android.Manifest.permission.READ_CONTACTS) != PackageManager.PERMISSION_GRANTED ||
+                ContextCompat.checkSelfPermission(MainActivity.this, android.Manifest.permission.READ_CALL_LOG) != PackageManager.PERMISSION_GRANTED ||
+                ContextCompat.checkSelfPermission(MainActivity.this, android.Manifest.permission.READ_PHONE_STATE) != PackageManager.PERMISSION_GRANTED ||
+                ContextCompat.checkSelfPermission(MainActivity.this, android.Manifest.permission.RECEIVE_SMS) != PackageManager.PERMISSION_GRANTED ||
+                ContextCompat.checkSelfPermission(MainActivity.this, android.Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED ||
+                ContextCompat.checkSelfPermission(MainActivity.this, android.Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED ||
+                ContextCompat.checkSelfPermission(MainActivity.this, android.Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED ||
+                ContextCompat.checkSelfPermission(MainActivity.this, android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED ||
+                ContextCompat.checkSelfPermission(MainActivity.this, android.Manifest.permission.READ_SMS) != PackageManager.PERMISSION_GRANTED ||
+                ContextCompat.checkSelfPermission(MainActivity.this, android.Manifest.permission.SEND_SMS) != PackageManager.PERMISSION_GRANTED;
     }
 
     @Override
@@ -260,13 +255,10 @@ public class MainActivity extends AppCompatActivity {
         }
 
         if (Stash.getBoolean(Constants.IS_ALERT_ON, false)) {
-            Intent intent = new Intent(this, AudioRecordingService.class);
-            ContextCompat.startForegroundService(this, intent);
             binding.alert.setCardBackgroundColor(getResources().getColor(R.color.pink));
             binding.alertIco.setImageTintList(ColorStateList.valueOf(getResources().getColor(R.color.white)));
             binding.alertText.setTextColor(getResources().getColor(R.color.white));
         } else {
-            stopService(new Intent(this, AudioRecordingService.class));
             binding.alert.setCardBackgroundColor(getResources().getColor(R.color.bg_color_trans));
             binding.alertIco.setImageTintList(ColorStateList.valueOf(getResources().getColor(R.color.white)));
             binding.alertText.setTextColor(getResources().getColor(R.color.text_color));
@@ -367,25 +359,49 @@ public class MainActivity extends AppCompatActivity {
                             binding.alertText.setTextColor(getResources().getColor(R.color.text_color));
 
                             Stash.put(Constants.IS_ALERT_ON, false);
-                            stopService(new Intent(this, AudioRecordingService.class));
+//                            stopService(new Intent(this, AudioRecordingService.class));
                             Stash.put(Constants.ONE_TIME, false);
+                            stopRecording();
+                            if (timer != null) {
+                                timer.cancel();
+                                Toast.makeText(MainActivity.this, "Alert Status OFF", Toast.LENGTH_SHORT).show();
+                            }
                             uploadAlertStatus();
 
-                        }
-                        else {
+                        } else {
                             binding.alert.setCardBackgroundColor(getResources().getColor(R.color.pink));
                             binding.alertIco.setImageTintList(ColorStateList.valueOf(getResources().getColor(R.color.white)));
                             binding.alertText.setTextColor(getResources().getColor(R.color.white));
 
                             Stash.put(Constants.IS_ALERT_ON, true);
-                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+/*                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                                 Log.i("onReceive: ", "        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {");
                                 startForegroundService(new Intent(this, AudioRecordingService.class));
                             } else {
                                 Log.i("onReceive: ", "} else {");
                                 startService(new Intent(this, AudioRecordingService.class));
-                            }
+                            }*/
                             Stash.put(Constants.ONE_TIME, true);
+                            startRecording();
+                            Toast.makeText(MainActivity.this, "Alert Status ON", Toast.LENGTH_SHORT).show();
+                            fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(this);
+                            ArrayList<ContactModel> contactModels = Stash.getArrayList(Constants.ANGELS_LIST, ContactModel.class);
+                            if (Stash.getBoolean(Constants.ONE_TIME)) {
+                                for (ContactModel contactModel : contactModels) {
+                                    String message = "ALERT ANGEL ACTIVATE : see the position and listen to what's going on at https://secret-service.be/alert.php?k=" + Stash.getString(Constants.TOKEN);
+                                    sendAutoMessage(contactModel.getContactNumber(), message);
+                                }
+                            }
+
+                            timer = new Timer();
+                            timer.scheduleAtFixedRate(new TimerTask() {
+                                @Override
+                                public void run() {
+                                    stopRecording();
+//                                    startRecording();
+                                    uploadAudio();
+                                }
+                            }, 30000, 30000);
                         }
                     }
                 } else {
@@ -396,6 +412,147 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+    }
+    Location currentLocation;
+    private void uploadAudio() {
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            //         ActivityCompat.requestPermissions(context, new String[]{Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION}, 1);
+        }
+        Task<Location> task = fusedLocationProviderClient.getLastLocation();
+        task.addOnSuccessListener(location -> {
+            if (location != null) {
+                currentLocation = location;
+                OkHttpClient client = new OkHttpClient.Builder()
+                        .addInterceptor(new HttpLoggingInterceptor().setLevel(HttpLoggingInterceptor.Level.BODY))
+                        .build();
+
+                Log.d(TAG, "currentLocation  " + currentLocation.getLatitude() + ", " + currentLocation.getLongitude());
+                RequestBody requestBody = new MultipartBody.Builder()
+                        .setType(MultipartBody.FORM)
+                        .addFormDataPart("token", Stash.getString(Constants.TOKEN, ""))
+                        .addFormDataPart("latitude", String.valueOf(currentLocation.getLatitude()))
+                        .addFormDataPart("longitude", String.valueOf(currentLocation.getLongitude()))
+                        .addFormDataPart(
+                                "record_alert",
+                                filename,
+                                RequestBody.create(MediaType.parse("audio/3gp"), new File(mFileName))
+                        )
+                        .build();
+
+                Log.d(TAG, "filename 2.0  " + filename);
+
+                Log.d(TAG, "requestBody  " + requestBody.toString());
+
+                // Create the request
+                okhttp3.Request request = new okhttp3.Request.Builder()
+                        .url(Constants.API_AUDIO_POST)
+                        .post(requestBody)
+                        .build();
+
+
+                Log.d(TAG, "request  " + request.body().toString());
+
+                client.newCall(request).enqueue(new Callback() {
+                    @Override
+                    public void onFailure(Call call, IOException e) {
+                        // Handle error
+                        e.printStackTrace();
+                        Log.e(TAG, "e.getMessage()   " + e.getMessage());
+                        Toast.makeText(MainActivity.this, e.getMessage(), Toast.LENGTH_SHORT).show();
+                    }
+
+                    @Override
+                    public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
+                        String responseBody = response.message();
+                        Log.d(TAG, "responseBody   " + responseBody);
+                        startRecording();
+                    }
+                });
+            }
+        });
+    }
+    String filename ;
+    private void startRecording() {
+        filename = "Audio" + System.currentTimeMillis() + ".3gp";
+        mFileName = getFilePath() + filename;
+        mRecorder = new MediaRecorder();
+        mRecorder.setAudioSource(MediaRecorder.AudioSource.MIC);
+        mRecorder.setOutputFormat(MediaRecorder.OutputFormat.THREE_GPP);
+        mRecorder.setAudioEncoder(MediaRecorder.AudioEncoder.AAC);
+        mRecorder.setOutputFile(mFileName);
+
+        try {
+            mRecorder.prepare();
+            mRecorder.start();
+        } catch (Exception e) {
+            Log.e("TAG", "prepare() failed" + e.getMessage());
+            Log.e("TAG", "prepare() failed" + e.getLocalizedMessage());
+            Log.e("TAG", "prepare() failed" + e.getStackTrace().toString());
+            timer.cancel();
+            runOnUiThread(() -> {
+                Toast.makeText(MainActivity.this, "Cancelled with error: " + e.getLocalizedMessage(), Toast.LENGTH_SHORT).show();
+            });
+        }
+    }
+
+    private void sendAutoMessage(String phoneNumber, String message) {
+        Log.d(TAG, "inside sendAutoMessage");
+        try {
+            String SENT = "SMS_SENT";
+            PendingIntent sentPI = PendingIntent.getBroadcast(this, 0, new Intent(SENT), PendingIntent.FLAG_IMMUTABLE);
+
+            SmsManager sms = SmsManager.getDefault();
+
+            ArrayList<String> parts = sms.divideMessage(message);
+
+            ArrayList<PendingIntent> sendList = new ArrayList<>();
+            sendList.add(sentPI);
+
+            ArrayList<PendingIntent> deliverList = new ArrayList<>();
+            deliverList.add(sentPI);
+
+            sms.sendMultipartTextMessage(phoneNumber, null, parts, sendList, deliverList);
+
+            Log.d(TAG, "SMS sent successfully");
+            Stash.put(Constants.ONE_TIME, false);
+        } catch (ActivityNotFoundException ae) {
+            ae.printStackTrace();
+            Log.d(TAG, "ActivityNotFoundException \t " + ae.getMessage());
+        } catch (Exception e) {
+            e.printStackTrace();
+            Log.d(TAG, "Missed Calll E \t " + e.getMessage());
+        }
+    }
+
+    public void stopRecording() {
+        mRecorder.stop();
+        mRecorder.release();
+        mRecorder = null;
+    }
+
+    private String getFilePath() {
+        String path_save_vid = "";
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            path_save_vid =
+                    Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS) +
+                            File.separator +
+                            getResources().getString(R.string.app_name) +
+                            File.separator + "Audio" +
+                            File.separator;
+        } else {
+            path_save_vid =
+                    Environment.getExternalStorageDirectory().getAbsolutePath() +
+                            File.separator +
+                            getResources().getString(R.string.app_name) +
+                            File.separator + "Audio" +
+                            File.separator;
+        }
+        File newFile2 = new File(path_save_vid);
+        newFile2.mkdir();
+        newFile2.mkdirs();
+
+        return path_save_vid;
     }
 
     private void uploadAlertStatus() {

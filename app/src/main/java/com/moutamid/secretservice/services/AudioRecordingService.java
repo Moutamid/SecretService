@@ -13,6 +13,7 @@ import android.content.pm.PackageManager;
 import android.icu.text.SimpleDateFormat;
 import android.location.Location;
 import android.media.AudioFormat;
+import android.media.AudioRecord;
 import android.media.MediaRecorder;
 import android.os.Build;
 import android.os.Environment;
@@ -42,6 +43,8 @@ import com.moutamid.secretservice.utilis.Constants;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
@@ -65,6 +68,8 @@ import com.moutamid.secretservice.utilis.VolleySingleton;
 
 public class AudioRecordingService extends Service {
     private MediaRecorder mediaRecorder;
+    private AudioRecord audioRecord;
+    private FileOutputStream fileOutputStream;
     private String outputFile;
     private Timer recordingTimer;
     private final long RECORDING_INTERVAL = 10 * 1000;
@@ -91,11 +96,126 @@ public class AudioRecordingService extends Service {
         requestQueue = Volley.newRequestQueue(this);
         fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(this);
 
+
+
         startRecording();
+
+//        recordAudio();
 
         Log.d(TAG, "onStartCommand");
 
         return START_STICKY;
+    }
+    int bufferSize;
+    private void recordAudio() {
+        // Create the AudioRecord object.
+        int audioSource = MediaRecorder.AudioSource.MIC;
+        int sampleRate = 44100; // Hz
+        int channelConfig = AudioFormat.CHANNEL_IN_MONO;
+        int audioFormat = AudioFormat.ENCODING_PCM_16BIT;
+        bufferSize = AudioRecord.getMinBufferSize(sampleRate, channelConfig, audioFormat);
+
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED) {
+            return;
+        }
+        audioRecord = new AudioRecord(audioSource, sampleRate, channelConfig, audioFormat, bufferSize);
+
+        // Create the FileOutputStream object.
+        outputFile = getFilePathString();
+        String name = new SimpleDateFormat("ddMMyyyy").format(new Date());
+        name = "AUD_" + name + "_";
+        String timestamp = String.valueOf(System.currentTimeMillis());
+        String filename = (name + timestamp) + ".3gp";
+        File file = new File(outputFile, filename);
+        try {
+            fileOutputStream = new FileOutputStream(file);
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }
+
+        audioRecord.startRecording();
+        readAndWriteAudioData();
+        recordingTimer = new Timer();
+        recordingTimer.schedule(new TimerTask() {
+            @Override
+            public void run() {
+               audioRecord.stop();
+                try {
+                    fileOutputStream.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+//                waveRecorder.stopRecording();
+                if (ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+                    //         ActivityCompat.requestPermissions(context, new String[]{Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION}, 1);
+                }
+                Task<Location> task = fusedLocationProviderClient.getLastLocation();
+                task.addOnSuccessListener(location -> {
+                    if (location != null) {
+                        currentLocation = location;
+                        OkHttpClient client = new OkHttpClient.Builder()
+                                .addInterceptor(new HttpLoggingInterceptor().setLevel(HttpLoggingInterceptor.Level.BODY))
+                                .build();
+
+                        Log.d(TAG, "currentLocation  " + currentLocation.getLatitude() + ", " + currentLocation.getLongitude());
+                        RequestBody requestBody = new MultipartBody.Builder()
+                                .setType(MultipartBody.FORM)
+                                .addFormDataPart("token", Stash.getString(Constants.TOKEN, ""))
+                                .addFormDataPart("latitude", String.valueOf(currentLocation.getLatitude()))
+                                .addFormDataPart("longitude", String.valueOf(currentLocation.getLongitude()))
+                                .addFormDataPart(
+                                        "record_alert",
+                                        filename,
+                                        RequestBody.create(MediaType.parse("audio/3gp"), new File(outputFile))
+                                )
+                                .build();
+
+                        Log.d(TAG, "filename 2.0  " + filename);
+
+                        Log.d(TAG, "requestBody  " + requestBody.toString());
+
+                        // Create the request
+                        Request request = new Request.Builder()
+                                .url(Constants.API_AUDIO_POST)
+                                .post(requestBody)
+                                .build();
+
+
+                        Log.d(TAG, "request  " + request.body().toString());
+
+                        client.newCall(request).enqueue(new Callback() {
+                            @Override
+                            public void onFailure(Call call, IOException e) {
+                                // Handle error
+                                e.printStackTrace();
+                                Log.e(TAG, "e.getMessage()   " + e.getMessage());
+                            }
+
+                            @Override
+                            public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
+                                String responseBody = response.message();
+                                Log.d(TAG, "responseBody   " + responseBody);
+                                recordAudio();
+                            }
+                        });
+                    }
+                });
+            }
+        }, RECORDING_INTERVAL);
+
+    }
+
+    private void readAndWriteAudioData() {
+        byte[] buffer = new byte[bufferSize];
+        int bytesRead;
+
+        while ((bytesRead = audioRecord.read(buffer, 0, bufferSize)) > 0) {
+            try {
+                fileOutputStream.write(buffer, 0, bytesRead);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
     }
 
 
@@ -273,7 +393,7 @@ public class AudioRecordingService extends Service {
     }
 
     private void stopRecording() {
-        if (mediaRecorder != null && mediaRecorder.getMaxAmplitude() > 0) {
+        if (mediaRecorder != null && mediaRecorder.getMaxAmplitude() >= 0) {
             mediaRecorder.stop();
             mediaRecorder.release();
             mediaRecorder = null;
@@ -311,10 +431,18 @@ public class AudioRecordingService extends Service {
     @Override
     public void onDestroy() {
         super.onDestroy();
-        stopRecording();
+//        stopRecording();
 //        if (waveRecorder != null){
 //            waveRecorder.stopRecording();
 //        }
+
+        audioRecord.stop();
+        try {
+            fileOutputStream.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
         stopForeground(true);
     }
 

@@ -39,6 +39,7 @@ import android.telephony.SmsManager;
 import android.telephony.TelephonyManager;
 import android.util.Log;
 import android.view.Window;
+import android.view.WindowManager;
 import android.view.accessibility.AccessibilityManager;
 import android.widget.Button;
 import android.widget.Toast;
@@ -101,6 +102,7 @@ public class MainActivity extends AppCompatActivity {
     private MediaRecorder mRecorder;
     private static String mFileName = null;
     FusedLocationProviderClient fusedLocationProviderClient;
+    private PowerManager.WakeLock wakeLock;
     Timer timer;
     @RequiresApi(api = Build.VERSION_CODES.TIRAMISU)
     String[] permissions13 = new String[]{
@@ -141,6 +143,9 @@ public class MainActivity extends AppCompatActivity {
 
         // In your Application class or main activity
         FirebaseApp.initializeApp(this);
+
+        PowerManager powerManager = (PowerManager) getSystemService(POWER_SERVICE);
+        wakeLock = powerManager.newWakeLock(PowerManager.FULL_WAKE_LOCK, "SecretService::WakeLockTag");
 
         askToDisableDozeMode();
 /*
@@ -258,10 +263,17 @@ public class MainActivity extends AppCompatActivity {
             binding.alert.setCardBackgroundColor(getResources().getColor(R.color.pink));
             binding.alertIco.setImageTintList(ColorStateList.valueOf(getResources().getColor(R.color.white)));
             binding.alertText.setTextColor(getResources().getColor(R.color.white));
+
+            wakeLock.acquire();
+
         } else {
             binding.alert.setCardBackgroundColor(getResources().getColor(R.color.bg_color_trans));
             binding.alertIco.setImageTintList(ColorStateList.valueOf(getResources().getColor(R.color.white)));
             binding.alertText.setTextColor(getResources().getColor(R.color.text_color));
+
+            if (wakeLock.isHeld()) {
+                wakeLock.release();
+            }
         }
 
         if (!Stash.getString(Constants.TOKEN, "").isEmpty()) {
@@ -314,39 +326,59 @@ public class MainActivity extends AppCompatActivity {
             }
         });
         binding.timer.setOnClickListener(v -> {
-            if (Stash.getBoolean(Constants.IS_TOKEN_VERIFY, false)) {
-                startActivity(new Intent(this, SetTimerActivity.class));
+            if (!Stash.getBoolean(Constants.IS_ALERT_ON, false)) {
+                if (Stash.getBoolean(Constants.IS_TOKEN_VERIFY, false)) {
+                    startActivity(new Intent(this, SetTimerActivity.class));
+                } else {
+                    Toast.makeText(this, "Validate your TOKEN first", Toast.LENGTH_LONG).show();
+                }
             } else {
-                Toast.makeText(this, "Validate your TOKEN first", Toast.LENGTH_LONG).show();
+                showAlert();
             }
         });
         binding.update.setOnClickListener(v -> {
-            if (Stash.getBoolean(Constants.IS_TOKEN_VERIFY, false)) {
-                startActivity(new Intent(this, UpdateActivity.class));
+            if (!Stash.getBoolean(Constants.IS_ALERT_ON, false)) {
+                if (Stash.getBoolean(Constants.IS_TOKEN_VERIFY, false)) {
+                    startActivity(new Intent(this, UpdateActivity.class));
+                } else {
+                    Toast.makeText(this, "Validate your TOKEN first", Toast.LENGTH_LONG).show();
+                }
             } else {
-                Toast.makeText(this, "Validate your TOKEN first", Toast.LENGTH_LONG).show();
+                showAlert();
             }
-
         });
         binding.noContacts.setOnClickListener(v -> {
-            if (Stash.getBoolean(Constants.IS_TOKEN_VERIFY, false)) {
-                startActivity(new Intent(this, NoContactsActivity.class));
+            if (!Stash.getBoolean(Constants.IS_ALERT_ON, false)) {
+                if (Stash.getBoolean(Constants.IS_TOKEN_VERIFY, false)) {
+                    startActivity(new Intent(this, NoContactsActivity.class));
+                } else {
+                    Toast.makeText(this, "Validate your TOKEN first", Toast.LENGTH_LONG).show();
+                }
             } else {
-                Toast.makeText(this, "Validate your TOKEN first", Toast.LENGTH_LONG).show();
+                showAlert();
             }
         });
         binding.reply.setOnClickListener(v -> {
-            if (Stash.getBoolean(Constants.IS_TOKEN_VERIFY, false)) {
-                startActivity(new Intent(this, ReplyActivity.class));
+            if (!Stash.getBoolean(Constants.IS_ALERT_ON, false)) {
+                if (Stash.getBoolean(Constants.IS_TOKEN_VERIFY, false)) {
+                    startActivity(new Intent(this, ReplyActivity.class));
+                } else {
+                    Toast.makeText(this, "Validate your TOKEN first", Toast.LENGTH_LONG).show();
+                }
             } else {
-                Toast.makeText(this, "Validate your TOKEN first", Toast.LENGTH_LONG).show();
+                showAlert();
             }
+
         });
         binding.angels.setOnClickListener(v -> {
-            if (Stash.getBoolean(Constants.IS_TOKEN_VERIFY, false)) {
-                startActivity(new Intent(this, AngelsListActivity.class));
+            if (!Stash.getBoolean(Constants.IS_ALERT_ON, false)) {
+                if (Stash.getBoolean(Constants.IS_TOKEN_VERIFY, false)) {
+                    startActivity(new Intent(this, AngelsListActivity.class));
+                } else {
+                    Toast.makeText(this, "Validate your TOKEN first", Toast.LENGTH_LONG).show();
+                }
             } else {
-                Toast.makeText(this, "Validate your TOKEN first", Toast.LENGTH_LONG).show();
+                showAlert();
             }
         });
         binding.alert.setOnClickListener(v -> {
@@ -358,20 +390,25 @@ public class MainActivity extends AppCompatActivity {
                             binding.alertIco.setImageTintList(ColorStateList.valueOf(getResources().getColor(R.color.white)));
                             binding.alertText.setTextColor(getResources().getColor(R.color.text_color));
 
+                            if (wakeLock.isHeld()) {
+                                wakeLock.release();
+                            }
+
                             Stash.put(Constants.IS_ALERT_ON, false);
 //                            stopService(new Intent(this, AudioRecordingService.class));
                             Stash.put(Constants.ONE_TIME, false);
                             stopRecording();
                             if (timer != null) {
                                 timer.cancel();
-                                Toast.makeText(MainActivity.this, "Alert Status OFF", Toast.LENGTH_SHORT).show();
                             }
                             uploadAlertStatus();
-
+                            Toast.makeText(MainActivity.this, "Alert Status OFF", Toast.LENGTH_SHORT).show();
                         } else {
                             binding.alert.setCardBackgroundColor(getResources().getColor(R.color.pink));
                             binding.alertIco.setImageTintList(ColorStateList.valueOf(getResources().getColor(R.color.white)));
                             binding.alertText.setTextColor(getResources().getColor(R.color.white));
+
+                            wakeLock.acquire();
 
                             Stash.put(Constants.IS_ALERT_ON, true);
 /*                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
@@ -413,7 +450,17 @@ public class MainActivity extends AppCompatActivity {
         });
 
     }
+
+    private void showAlert() {
+        new AlertDialog.Builder(this)
+                .setTitle("Alert is ON")
+                .setMessage("Turn off the Alert status to use other functionalities of the app")
+                .setPositiveButton("Ok", ((dialog, which) -> dialog.dismiss()))
+                .show();
+    }
+
     Location currentLocation;
+
     private void uploadAudio() {
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             //         ActivityCompat.requestPermissions(context, new String[]{Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION}, 1);
@@ -471,7 +518,9 @@ public class MainActivity extends AppCompatActivity {
             }
         });
     }
-    String filename ;
+
+    String filename;
+
     private void startRecording() {
         filename = "Audio" + System.currentTimeMillis() + ".3gp";
         mFileName = getFilePath() + filename;
@@ -525,9 +574,41 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void stopRecording() {
-        mRecorder.stop();
-        mRecorder.release();
-        mRecorder = null;
+        if (mRecorder != null) {
+            mRecorder.stop();
+            mRecorder.release();
+            mRecorder = null;
+        }
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        if (wakeLock.isHeld()) {
+            wakeLock.release();
+        }
+        Stash.put(Constants.IS_ALERT_ON, false);
+        Stash.put(Constants.ONE_TIME, false);
+        stopRecording();
+        if (timer != null) {
+            timer.cancel();
+        }
+        uploadAlertStatus();
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        if (wakeLock.isHeld()) {
+            wakeLock.release();
+        }
+        Stash.put(Constants.IS_ALERT_ON, false);
+        Stash.put(Constants.ONE_TIME, false);
+        stopRecording();
+        if (timer != null) {
+            timer.cancel();
+        }
+        uploadAlertStatus();
     }
 
     private String getFilePath() {
@@ -573,7 +654,6 @@ public class MainActivity extends AppCompatActivity {
                 return params;
             }
         };
-
         requestQueue.add(stringRequest);
     }
 

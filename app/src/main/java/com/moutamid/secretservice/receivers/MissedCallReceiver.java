@@ -14,7 +14,9 @@ import android.telephony.TelephonyManager;
 import android.database.Cursor;
 import android.util.Log;
 import android.widget.Toast;
-
+import androidx.core.content.ContextCompat;
+import com.google.android.gms.common.Feature;
+import com.google.android.gms.tasks.Tasks;
 import com.fxn.stash.Stash;
 import com.moutamid.secretservice.models.ContactModel;
 import com.moutamid.secretservice.models.MessageModel;

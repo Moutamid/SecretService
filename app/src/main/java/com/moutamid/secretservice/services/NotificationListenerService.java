@@ -129,28 +129,34 @@ public class NotificationListenerService extends android.service.notification.No
         Notification notification = sbn.getNotification();
         if (Stash.getBoolean(Constants.IS_ON, false)) {
             Log.d(TAG, "onNotificationPosted 22");
+            Log.d(TAG, "onNotificationPosted getPackageName  " + sbn.getPackageName());
             if (sbn.getPackageName().equals("com.whatsapp")) {
+                Log.d(TAG, "onNotificationPosted whatsapp");
                 String name = sbn.getNotification().extras.getString("android.title");
                 if (getHour(name, Constants.WHATSAPP)) {
                     sendMessageToContact(notification, sbn.getNotification().extras, sbn.getPackageName(), sbn.getKey());
                 }
             } else if (sbn.getPackageName().equals("org.telegram.messenger")) {
+                Log.d(TAG, "onNotificationPosted telegram");
                 String name = sbn.getNotification().extras.getString("android.title");
                 if (getHour(name, Constants.TELEGRAM)) {
                     sendMessageToContact(notification, sbn.getNotification().extras, sbn.getPackageName(), sbn.getKey());
                 }
             } else if (sbn.getPackageName().equals("com.skype.raider")) {
+                Log.d(TAG, "onNotificationPosted skype");
                 String name = sbn.getNotification().extras.getString("android.title");
                 if (getHour(name, Constants.SKYPE)) {
                     sendMessageToContact(notification, sbn.getNotification().extras, sbn.getPackageName(), sbn.getKey());
                 }
             }
-            /*else if (sbn.getPackageName().equals("com.google.android.apps.messaging")) {
+            else if (sbn.getPackageName().equals("com.google.android.apps.messaging")) {
+                Log.d(TAG, "onNotificationPosted google");
                 String name = sbn.getNotification().extras.getString("android.title");
+                Log.d(TAG, "onNotificationPosted c  " + getHour(name, Constants.SMS));
                 if (getHour(name, Constants.SMS)) {
                     sendMessageToContact(notification, sbn.getNotification().extras, sbn.getPackageName(), sbn.getKey());
                 }
-            }*/
+            }
         }
     }
 
@@ -160,7 +166,7 @@ public class NotificationListenerService extends android.service.notification.No
 
     private boolean isAllowedPlatform(String packageName) {
 //        return packageName.equals("com.whatsapp") || packageName.equals("org.telegram.messenger") || packageName.equals("com.skype.raider") || packageName.equals(getDefaultSmsAppPackageName(context));
-        return packageName.equals("com.whatsapp") || packageName.equals("org.telegram.messenger") || packageName.equals("com.skype.raider");
+        return packageName.equals("com.whatsapp") || packageName.equals("org.telegram.messenger") || packageName.equals("com.skype.raider") || packageName.equals("com.google.android.apps.messaging");
     }
 
     private boolean getHour(String name, String source) {
@@ -242,6 +248,7 @@ public class NotificationListenerService extends android.service.notification.No
 
 
         Log.d(TAG, "check   " + check);
+        Log.d(TAG, "isValid   " + isValid);
 
         if (!check) {
             return false;

@@ -94,17 +94,17 @@ public class TokenActivity extends AppCompatActivity {
                                 Stash.put(Constants.IS_TOKEN_VERIFY, true);
                                 binding.validated.setVisibility(View.VISIBLE);
                                 binding.notValidated.setVisibility(View.GONE);
-                                Toast.makeText(TokenActivity.this, "Token Updated", Toast.LENGTH_LONG).show();
+                                Constants.showToast(TokenActivity.this, "Token validated");
                             } else {
                                 Stash.put(Constants.TOKEN, "");
                                 Stash.put(Constants.IS_TOKEN_VERIFY, false);
                                 binding.validated.setVisibility(View.GONE);
                                 binding.notValidated.setVisibility(View.VISIBLE);
-                                Toast.makeText(TokenActivity.this, "Token is not valid", Toast.LENGTH_LONG).show();
+                                Constants.showToast(TokenActivity.this, "Token is not valid");
                             }
                         } catch (JSONException e) {
                             e.printStackTrace();
-                            Toast.makeText(TokenActivity.this, "Something went wrong!", Toast.LENGTH_LONG).show();
+                            Constants.showToast(TokenActivity.this, "Something went wrong!");
                         }
                     }
                 },
@@ -113,7 +113,7 @@ public class TokenActivity extends AppCompatActivity {
                     public void onErrorResponse(VolleyError error) {
                         runOnUiThread(Constants::dismissDialog);
                         Log.d("TOKEN_CHECK", error.getLocalizedMessage() + "");
-                        Toast.makeText(TokenActivity.this, error.getLocalizedMessage() + "", Toast.LENGTH_LONG).show();
+                        Constants.showToast(TokenActivity.this, error.getLocalizedMessage() + "");
                     }
                 }
         ) {

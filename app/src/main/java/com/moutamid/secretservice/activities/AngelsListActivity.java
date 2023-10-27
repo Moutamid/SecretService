@@ -18,6 +18,7 @@ import android.util.Log;
 import android.widget.Toast;
 
 import com.fxn.stash.Stash;
+import com.moutamid.secretservice.MainActivity;
 import com.moutamid.secretservice.R;
 import com.moutamid.secretservice.adapters.AngelsAdapter;
 import com.moutamid.secretservice.databinding.ActivityAngelsListBinding;
@@ -70,7 +71,7 @@ public class AngelsListActivity extends AppCompatActivity {
                 pickContact.setType(ContactsContract.CommonDataKinds.Phone.CONTENT_TYPE);
                 startActivityForResult(pickContact, PICK_CONTACT_REQUEST);
             } else {
-                Toast.makeText(this, "Permission is required to get the Contact Details", Toast.LENGTH_SHORT).show();
+                Constants.showToast(AngelsListActivity.this, "Permission is required to get the Contact Details");
             }
         }
     }

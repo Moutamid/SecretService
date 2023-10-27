@@ -38,9 +38,9 @@
             android:orientation="horizontal">
 
             <com.google.android.material.card.MaterialCardView
-                android:id="@+id/telegram"
+                android:id="@+id/sms"
                 android:layout_width="0dp"
-                android:layout_height="wrap_content"
+                android:layout_height="match_parent"
                 android:layout_marginEnd="5dp"
                 android:layout_weight="1"
                 app:cardBackgroundColor="@color/bg_color_trans"
@@ -56,58 +56,20 @@
                     android:padding="12dp">
 
                     <ImageView
-                        android:id="@+id/telegramIcon"
+                        android:id="@+id/smsIcon"
                         android:layout_width="36dp"
                         android:layout_height="36dp"
-                        android:src="@drawable/telegram"
+                        android:src="@drawable/chat"
                         app:tint="@color/white" />
 
                     <TextView
-                        android:id="@+id/telegramText"
+                        android:id="@+id/smsText"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="10dp"
                         android:gravity="center"
                         android:textColor="@color/text_color"
-                        android:text="Telegram" />
-                </LinearLayout>
-
-            </com.google.android.material.card.MaterialCardView>
-
-            <com.google.android.material.card.MaterialCardView
-                android:id="@+id/skype"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="5dp"
-                android:layout_marginEnd="5dp"
-                android:layout_weight="1"
-                app:cardBackgroundColor="@color/bg_color_trans"
-                app:cardCornerRadius="12dp"
-                app:cardElevation="0dp"
-                app:strokeWidth="0dp">
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:gravity="center"
-                    android:orientation="vertical"
-                    android:padding="12dp">
-
-                    <ImageView
-                        android:id="@+id/skypeIcon"
-                        android:layout_width="36dp"
-                        android:layout_height="36dp"
-                        android:src="@drawable/skype"
-                        app:tint="@color/white" />
-
-                    <TextView
-                        android:id="@+id/skypeText"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="10dp"
-                        android:gravity="center"
-                        android:textColor="@color/text_color"
-                        android:text="Skype" />
+                        android:text="SMS" />
                 </LinearLayout>
 
             </com.google.android.material.card.MaterialCardView>
@@ -117,6 +79,7 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="5dp"
+                android:layout_marginEnd="5dp"
                 android:layout_weight="1"
                 app:cardBackgroundColor="@color/bg_color_trans"
                 app:cardCornerRadius="12dp"
@@ -149,6 +112,43 @@
 
             </com.google.android.material.card.MaterialCardView>
 
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/telegram"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="5dp"
+                android:layout_weight="1"
+                app:cardBackgroundColor="@color/bg_color_trans"
+                app:cardCornerRadius="12dp"
+                app:cardElevation="0dp"
+                app:strokeWidth="0dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:gravity="center"
+                    android:orientation="vertical"
+                    android:padding="12dp">
+
+                    <ImageView
+                        android:id="@+id/telegramIcon"
+                        android:layout_width="36dp"
+                        android:layout_height="36dp"
+                        android:src="@drawable/telegram"
+                        app:tint="@color/white" />
+
+                    <TextView
+                        android:id="@+id/telegramText"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="10dp"
+                        android:gravity="center"
+                        android:textColor="@color/text_color"
+                        android:text="Telegram" />
+                </LinearLayout>
+
+            </com.google.android.material.card.MaterialCardView>
+
         </LinearLayout>
 
         <LinearLayout
@@ -159,7 +159,7 @@
             android:orientation="horizontal">
 
             <com.google.android.material.card.MaterialCardView
-                android:id="@+id/missedCall"
+                android:id="@+id/skype"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_marginEnd="5dp"
@@ -177,20 +177,20 @@
                     android:padding="12dp">
 
                     <ImageView
-                        android:id="@+id/missedIcon"
+                        android:id="@+id/skypeIcon"
                         android:layout_width="36dp"
                         android:layout_height="36dp"
-                        android:src="@drawable/missed_call"
+                        android:src="@drawable/skype"
                         app:tint="@color/white" />
 
                     <TextView
-                        android:id="@+id/missedText"
+                        android:id="@+id/skypeText"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="10dp"
                         android:gravity="center"
                         android:textColor="@color/text_color"
-                        android:text="Missed Call" />
+                        android:text="Skype" />
                 </LinearLayout>
 
             </com.google.android.material.card.MaterialCardView>
@@ -234,9 +234,9 @@
             </com.google.android.material.card.MaterialCardView>
 
             <com.google.android.material.card.MaterialCardView
-                android:id="@+id/sms"
+                android:id="@+id/missedCall"
                 android:layout_width="0dp"
-                android:layout_height="match_parent"
+                android:layout_height="wrap_content"
                 android:layout_marginStart="5dp"
                 android:layout_weight="1"
                 app:cardBackgroundColor="@color/bg_color_trans"
@@ -252,20 +252,20 @@
                     android:padding="12dp">
 
                     <ImageView
-                        android:id="@+id/smsIcon"
+                        android:id="@+id/missedIcon"
                         android:layout_width="36dp"
                         android:layout_height="36dp"
-                        android:src="@drawable/chat"
+                        android:src="@drawable/missed_call"
                         app:tint="@color/white" />
 
                     <TextView
-                        android:id="@+id/smsText"
+                        android:id="@+id/missedText"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="10dp"
                         android:gravity="center"
                         android:textColor="@color/text_color"
-                        android:text="SMS" />
+                        android:text="Missed Call" />
                 </LinearLayout>
 
             </com.google.android.material.card.MaterialCardView>

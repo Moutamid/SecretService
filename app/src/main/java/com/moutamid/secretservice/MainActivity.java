@@ -38,6 +38,7 @@ import android.telephony.PhoneStateListener;
 import android.telephony.SmsManager;
 import android.telephony.TelephonyManager;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.Window;
 import android.view.WindowManager;
 import android.view.accessibility.AccessibilityManager;
@@ -313,16 +314,16 @@ public class MainActivity extends AppCompatActivity {
                                 Stash.put(Constants.IS_ON, true);
                             }
                         } else {
-                            Toast.makeText(this, "Create an AUTO ANSWER message first", Toast.LENGTH_SHORT).show();
+                            Constants.showToast(MainActivity.this, "Create an AUTO ANSWER message first");
                         }
                     } else {
-                        Toast.makeText(this, "Activate SET TIME first", Toast.LENGTH_LONG).show();
+                        Constants.showToast(MainActivity.this, "Activate SET TIME first");
                     }
                 } else {
-                    Toast.makeText(this, "Select REPLY TO channels first", Toast.LENGTH_LONG).show();
+                    Constants.showToast(MainActivity.this, "Select REPLY TO channels first");
                 }
             } else {
-                Toast.makeText(this, "Validate your TOKEN first", Toast.LENGTH_LONG).show();
+                Constants.showToast(MainActivity.this, "Validate your TOKEN first");
             }
         });
         binding.timer.setOnClickListener(v -> {
@@ -330,7 +331,7 @@ public class MainActivity extends AppCompatActivity {
                 if (Stash.getBoolean(Constants.IS_TOKEN_VERIFY, false)) {
                     startActivity(new Intent(this, SetTimerActivity.class));
                 } else {
-                    Toast.makeText(this, "Validate your TOKEN first", Toast.LENGTH_LONG).show();
+                    Constants.showToast(MainActivity.this, "Validate your TOKEN first");
                 }
             } else {
                 showAlert();
@@ -341,7 +342,7 @@ public class MainActivity extends AppCompatActivity {
                 if (Stash.getBoolean(Constants.IS_TOKEN_VERIFY, false)) {
                     startActivity(new Intent(this, UpdateActivity.class));
                 } else {
-                    Toast.makeText(this, "Validate your TOKEN first", Toast.LENGTH_LONG).show();
+                    Constants.showToast(MainActivity.this, "Validate your TOKEN first");
                 }
             } else {
                 showAlert();
@@ -352,7 +353,7 @@ public class MainActivity extends AppCompatActivity {
                 if (Stash.getBoolean(Constants.IS_TOKEN_VERIFY, false)) {
                     startActivity(new Intent(this, NoContactsActivity.class));
                 } else {
-                    Toast.makeText(this, "Validate your TOKEN first", Toast.LENGTH_LONG).show();
+                    Constants.showToast(MainActivity.this, "Validate your TOKEN first");
                 }
             } else {
                 showAlert();
@@ -363,7 +364,7 @@ public class MainActivity extends AppCompatActivity {
                 if (Stash.getBoolean(Constants.IS_TOKEN_VERIFY, false)) {
                     startActivity(new Intent(this, ReplyActivity.class));
                 } else {
-                    Toast.makeText(this, "Validate your TOKEN first", Toast.LENGTH_LONG).show();
+                    Constants.showToast(MainActivity.this, "Validate your TOKEN first");
                 }
             } else {
                 showAlert();
@@ -375,7 +376,7 @@ public class MainActivity extends AppCompatActivity {
                 if (Stash.getBoolean(Constants.IS_TOKEN_VERIFY, false)) {
                     startActivity(new Intent(this, AngelsListActivity.class));
                 } else {
-                    Toast.makeText(this, "Validate your TOKEN first", Toast.LENGTH_LONG).show();
+                    Constants.showToast(MainActivity.this, "Validate your TOKEN first");
                 }
             } else {
                 showAlert();
@@ -402,7 +403,7 @@ public class MainActivity extends AppCompatActivity {
                                 timer.cancel();
                             }
                             uploadAlertStatus();
-                            Toast.makeText(MainActivity.this, "Alert Status OFF", Toast.LENGTH_SHORT).show();
+                            Constants.showToast(MainActivity.this, "Alert Status OFF");
                         } else {
                             binding.alert.setCardBackgroundColor(getResources().getColor(R.color.pink));
                             binding.alertIco.setImageTintList(ColorStateList.valueOf(getResources().getColor(R.color.white)));
@@ -420,7 +421,7 @@ public class MainActivity extends AppCompatActivity {
                             }*/
                             Stash.put(Constants.ONE_TIME, true);
                             startRecording();
-                            Toast.makeText(MainActivity.this, "Alert Status ON", Toast.LENGTH_SHORT).show();
+                            Constants.showToast(MainActivity.this, "Alert Status ON");
                             fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(this);
                             ArrayList<ContactModel> contactModels = Stash.getArrayList(Constants.ANGELS_LIST, ContactModel.class);
                             if (Stash.getBoolean(Constants.ONE_TIME)) {
@@ -442,10 +443,10 @@ public class MainActivity extends AppCompatActivity {
                         }
                     }
                 } else {
-                    Toast.makeText(this, "Select at least 1 contact in ANGEL'S LIST", Toast.LENGTH_LONG).show();
+                    Constants.showToast(MainActivity.this, "Select at least 1 contact in ANGEL'S LIST");
                 }
             } else {
-                Toast.makeText(this, "Validate your TOKEN first", Toast.LENGTH_LONG).show();
+                Constants.showToast(MainActivity.this, "Validate your TOKEN first");
             }
         });
 
@@ -505,7 +506,7 @@ public class MainActivity extends AppCompatActivity {
                         // Handle error
                         e.printStackTrace();
                         Log.e(TAG, "e.getMessage()   " + e.getMessage());
-                        Toast.makeText(MainActivity.this, e.getMessage(), Toast.LENGTH_SHORT).show();
+                        Constants.showToast(MainActivity.this, e.getMessage());
                     }
 
                     @Override
@@ -539,7 +540,7 @@ public class MainActivity extends AppCompatActivity {
             Log.e("TAG", "prepare() failed" + e.getStackTrace().toString());
             timer.cancel();
             runOnUiThread(() -> {
-                Toast.makeText(MainActivity.this, "Cancelled with error: " + e.getLocalizedMessage(), Toast.LENGTH_SHORT).show();
+                Constants.showToast(MainActivity.this, "Cancelled with error: " + e.getLocalizedMessage());
             });
         }
     }
@@ -643,7 +644,7 @@ public class MainActivity extends AppCompatActivity {
                 },
                 error -> {
                     Log.e("TOKEN_CHECK", "Error  : " + error.getLocalizedMessage() + "");
-                    Toast.makeText(MainActivity.this, error.getLocalizedMessage() + "", Toast.LENGTH_LONG).show();
+                    Constants.showToast(MainActivity.this, error.getLocalizedMessage() + "");
                 }
         ) {
             @Override
@@ -670,7 +671,7 @@ public class MainActivity extends AppCompatActivity {
                     intent.setData(Uri.parse("package:" + packageName));
                     startActivity(intent);
                 } else {
-                    Toast.makeText(MainActivity.this, "Doze mode is active", Toast.LENGTH_SHORT).show();
+                    Constants.showToast(MainActivity.this, "Doze mode is active");
                 }
             }
         } catch (Exception e) {

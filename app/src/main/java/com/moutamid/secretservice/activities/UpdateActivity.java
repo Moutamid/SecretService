@@ -70,17 +70,17 @@ public class UpdateActivity extends AppCompatActivity {
                             updateKeywords();
                         } else {
                             Stash.put(Constants.MESSAGE, "");
-                            Toast.makeText(UpdateActivity.this, "Message is empty", Toast.LENGTH_LONG).show();
+                            Constants.showToast(UpdateActivity.this, "Message is empty");
                         }
                     } catch (JSONException e) {
                         e.printStackTrace();
-                        Toast.makeText(UpdateActivity.this, "Something went wrong!", Toast.LENGTH_LONG).show();
+                        Constants.showToast(UpdateActivity.this, "Something went wrong!");
                     }
                 },
                 error -> {
                     runOnUiThread(Constants::dismissDialog);
                     Log.d("TOKEN_CHECK", error.getLocalizedMessage() + "");
-                    Toast.makeText(UpdateActivity.this, error.getLocalizedMessage() + "", Toast.LENGTH_LONG).show();
+                    Constants.showToast(UpdateActivity.this, error.getLocalizedMessage() + "");
                 }
         ) {
             @Override
@@ -111,16 +111,16 @@ public class UpdateActivity extends AppCompatActivity {
                         }
                         Stash.clear(Constants.KEYWORDS_MESSAGE);
                         Stash.put(Constants.KEYWORDS_MESSAGE, list);
-                        Toast.makeText(UpdateActivity.this, "Message Updated", Toast.LENGTH_SHORT).show();
+                        Constants.showToast(UpdateActivity.this, "Message saved");
                     } catch (JSONException e) {
                         e.printStackTrace();
-                        Toast.makeText(UpdateActivity.this, "Something went wrong!", Toast.LENGTH_LONG).show();
+                        Constants.showToast(UpdateActivity.this, "Something went wrong!");
                     }
                 },
                 error -> {
                     runOnUiThread(Constants::dismissDialog);
                     Log.d("TOKEN_CHECK", error.getLocalizedMessage() + "");
-                    Toast.makeText(UpdateActivity.this, error.getLocalizedMessage() + "", Toast.LENGTH_LONG).show();
+                    Constants.showToast(UpdateActivity.this, error.getLocalizedMessage() + "");
                 }
         ) {
             @Override

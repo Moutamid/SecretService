@@ -21,6 +21,7 @@ import android.view.Gravity;
 import android.view.ViewGroup;
 import android.view.Window;
 import android.widget.Button;
+import android.widget.Toast;
 
 import androidx.appcompat.app.AlertDialog;
 
@@ -84,6 +85,14 @@ public class Constants {
     // 15 August 2023 10:27
     public static String getFormattedDate(long date) {
         return new SimpleDateFormat(DATE_FORMAT, Locale.getDefault()).format(date);
+    }
+
+    public static void showToast(Context context, String message) {
+        Toast toast = new Toast(context);
+        toast.setGravity(Gravity.CENTER, 0, 0);
+        toast.setDuration(Toast.LENGTH_LONG);
+        toast.setText(message);
+        toast.show();
     }
 
     public static String getFormattedTime(long time) {

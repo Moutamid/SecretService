@@ -25,6 +25,8 @@ import com.moutamid.secretservice.utilis.Constants;
 import com.moutamid.secretservice.utilis.ContactManager;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 
 public class NoContactsActivity extends AppCompatActivity {
     ActivityNoContactsBinding binding;
@@ -40,6 +42,7 @@ public class NoContactsActivity extends AppCompatActivity {
 
         binding.toolbar.back.setOnClickListener(v -> onBackPressed());
         list = Stash.getArrayList(Constants.EXCLUDE_CONTACTS, ContactModel.class);
+        list.sort(Comparator.comparing(ContactModel::getContactName));
 
         binding.addContact.setOnClickListener(v -> {
             if (ContextCompat.checkSelfPermission(NoContactsActivity.this, Manifest.permission.READ_CONTACTS) != PackageManager.PERMISSION_GRANTED) {
@@ -61,6 +64,7 @@ public class NoContactsActivity extends AppCompatActivity {
         binding.selectAll.setOnClickListener(v -> {
             list.clear();
             list = ContactManager.getAllContacts(this);
+            list.sort(Comparator.comparing(ContactModel::getContactName));
             adapter = new ContactsAdapter(this, list);
             Log.d("CHECK123", "SIZE " + list.size());
             binding.contactRc.setAdapter(adapter);
@@ -84,7 +88,7 @@ public class NoContactsActivity extends AppCompatActivity {
                 pickContact.setType(ContactsContract.CommonDataKinds.Phone.CONTENT_TYPE);
                 startActivityForResult(pickContact, PICK_CONTACT_REQUEST);
             } else {
-                Toast.makeText(this, "Permission is required to get the Contact Details", Toast.LENGTH_SHORT).show();
+                Constants.showToast(this, "Permission is required to get the Contact Details");
             }
         }
     }
@@ -106,6 +110,7 @@ public class NoContactsActivity extends AppCompatActivity {
                         list = Stash.getArrayList(Constants.EXCLUDE_CONTACTS, ContactModel.class);
                         list.add(new ContactModel(contactName, contactNumber));
                         Log.d("CHECK123", "SIZE " + list.size());
+                        list.sort(Comparator.comparing(ContactModel::getContactName));
                         Stash.put(Constants.EXCLUDE_CONTACTS, list);
                         adapter = new ContactsAdapter(this, list);
                         binding.contactRc.setAdapter(adapter);

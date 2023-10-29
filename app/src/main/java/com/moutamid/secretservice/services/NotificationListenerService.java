@@ -17,6 +17,7 @@ import android.service.notification.StatusBarNotification;
 import android.telephony.SmsManager;
 import android.text.TextUtils;
 import android.util.Log;
+import android.widget.Toast;
 
 import androidx.annotation.RequiresApi;
 import androidx.core.app.NotificationManagerCompat;
@@ -63,6 +64,35 @@ public class NotificationListenerService extends android.service.notification.No
 //        context = this;
     }
 
+    public NotificationListenerService() {
+        super();
+        Log.d(TAG, "NotificationListenerService: Constructor");
+    }
+
+    @Override
+    public void onNotificationRemoved(StatusBarNotification sbn, RankingMap rankingMap, int reason) {
+        super.onNotificationRemoved(sbn, rankingMap, reason);
+        Log.d(TAG, "onNotificationRemoved: ");
+    }
+
+    @Override
+    public void onListenerConnected() {
+        super.onListenerConnected();
+        Log.d(TAG, "onListenerConnected: ");
+    }
+
+    @Override
+    public void onListenerDisconnected() {
+        super.onListenerDisconnected();
+        Log.d(TAG, "onListenerDisconnected: ");
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        Log.d(TAG, "onDestroy: ");
+    }
+
     @Override
     public void onNotificationPosted(StatusBarNotification sbn) {
         super.onNotificationPosted(sbn);
@@ -77,6 +107,10 @@ public class NotificationListenerService extends android.service.notification.No
             Bundle extras = sbn.getNotification().extras;
             String sender = extras.getString("android.title");
             String message = extras.getString("android.text");
+
+            if (message.equals("Messages is doing work in the background")) {
+                return;
+            }
 
             String currentNotificationKey = sender + message;
 
@@ -148,8 +182,7 @@ public class NotificationListenerService extends android.service.notification.No
                 if (getHour(name, Constants.SKYPE)) {
                     sendMessageToContact(notification, sbn.getNotification().extras, sbn.getPackageName(), sbn.getKey());
                 }
-            }
-            else if (sbn.getPackageName().equals("com.google.android.apps.messaging")) {
+            } else if (sbn.getPackageName().equals("com.google.android.apps.messaging")) {
                 Log.d(TAG, "onNotificationPosted google");
                 String name = sbn.getNotification().extras.getString("android.title");
                 Log.d(TAG, "onNotificationPosted c  " + getHour(name, Constants.SMS));
@@ -268,7 +301,7 @@ public class NotificationListenerService extends android.service.notification.No
 
         Log.d(TAG, "message \t " + message);
         Log.d(TAG, "notifMessage \t " + notifMessage);
-        if (notifMessage == null){
+        if (notifMessage == null) {
             notifMessage = "";
         }
 
@@ -282,7 +315,7 @@ public class NotificationListenerService extends android.service.notification.No
         Log.d(TAG, "message \t " + message);
         Log.d(TAG, "keywordReply \t " + keywordReply);
 
-        if (!keywordReply.isEmpty()){
+        if (!keywordReply.isEmpty()) {
             message = keywordReply;
         }
 

@@ -88,11 +88,7 @@ public class Constants {
     }
 
     public static void showToast(Context context, String message) {
-        Toast toast = new Toast(context);
-        toast.setGravity(Gravity.CENTER, 0, 0);
-        toast.setDuration(Toast.LENGTH_LONG);
-        toast.setText(message);
-        toast.show();
+        Toast.makeText(context, message, Toast.LENGTH_LONG).show();
     }
 
     public static String getFormattedTime(long time) {

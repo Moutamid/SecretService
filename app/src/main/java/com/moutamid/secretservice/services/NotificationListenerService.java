@@ -115,6 +115,14 @@ public class NotificationListenerService extends android.service.notification.No
                 }
             }
 
+            try {
+                if(message.matches(".*\\d.*") && message.contains("new messages")){
+                    return;
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+
             String currentNotificationKey = sender + message;
 
             long currentTime = System.currentTimeMillis();

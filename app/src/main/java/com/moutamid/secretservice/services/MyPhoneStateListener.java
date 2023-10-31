@@ -19,6 +19,7 @@ import com.moutamid.secretservice.utilis.Constants;
 
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Date;
 
 public class MyPhoneStateListener extends PhoneStateListener {
     private Context context;
@@ -125,9 +126,12 @@ public class MyPhoneStateListener extends PhoneStateListener {
         Log.d(TAG, "startTimeHour   " + startTimeHour + "\t\tendTimeHour    " + endTimeHour);
 
         if (Stash.getInt(Constants.TIME, 3) == 0) {
-            startTimeHour = Integer.parseInt(Constants.getFormattedHours(Stash.getLong(Constants.FROM_TIME, 0)));
-            endTimeHour = Integer.parseInt(Constants.getFormattedHours(Stash.getLong(Constants.TO_TIME, 0)));
-            isValid = currentHour >= startTimeHour && currentHour <= endTimeHour;
+            Date start = new Date(Stash.getLong(Constants.FROM_TIME, 0));
+            Date end = new Date(Stash.getLong(Constants.TO_TIME, 0));
+            Date current = new Date();
+//            startTimeHour = Integer.parseInt(Constants.getFormattedHours(Stash.getLong(Constants.FROM_TIME, 0)));
+//            endTimeHour = Integer.parseInt(Constants.getFormattedHours(Stash.getLong(Constants.TO_TIME, 0)));
+            isValid = current.after(start) && current.before(end);
         } else if (Stash.getInt(Constants.TIME, 3) == 1) {
             long startDateMillis = Stash.getLong(Constants.START_DAY, 0);
             long endDateMillis = Stash.getLong(Constants.END_DAY, 0);

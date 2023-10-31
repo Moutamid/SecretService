@@ -34,6 +34,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -108,8 +109,10 @@ public class NotificationListenerService extends android.service.notification.No
             String sender = extras.getString("android.title");
             String message = extras.getString("android.text");
 
-            if (message.equals("Messages is doing work in the background")) {
-                return;
+            if (message != null){
+                if (message.equals("Messages is doing work in the background")) {
+                    return;
+                }
             }
 
             String currentNotificationKey = sender + message;
@@ -214,9 +217,12 @@ public class NotificationListenerService extends android.service.notification.No
         Log.d(TAG, "startTimeHour   " + startTimeHour + "\t\tendTimeHour    " + endTimeHour);
 
         if (Stash.getInt(Constants.TIME, 3) == 0) {
-            startTimeHour = Integer.parseInt(Constants.getFormattedHours(Stash.getLong(Constants.FROM_TIME, 0)));
-            endTimeHour = Integer.parseInt(Constants.getFormattedHours(Stash.getLong(Constants.TO_TIME, 0)));
-            isValid = currentHour >= startTimeHour && currentHour <= endTimeHour;
+            Date start = new Date(Stash.getLong(Constants.FROM_TIME, 0));
+            Date end = new Date(Stash.getLong(Constants.TO_TIME, 0));
+            Date current = new Date();
+//            startTimeHour = Integer.parseInt(Constants.getFormattedHours(Stash.getLong(Constants.FROM_TIME, 0)));
+//            endTimeHour = Integer.parseInt(Constants.getFormattedHours(Stash.getLong(Constants.TO_TIME, 0)));
+            isValid = current.after(start) && current.before(end);
         } else if (Stash.getInt(Constants.TIME, 3) == 1) {
 
             long startDateMillis = Stash.getLong(Constants.START_DAY, 0);
@@ -299,8 +305,8 @@ public class NotificationListenerService extends android.service.notification.No
         String message = Stash.getString(Constants.MESSAGE, "N/A");
         String keywordReply = "";
 
-        Log.d(TAG, "message \t " + message);
-        Log.d(TAG, "notifMessage \t " + notifMessage);
+//        Log.d(TAG, "message \t " + message);
+//        Log.d(TAG, "notifMessage \t " + notifMessage);
         if (notifMessage == null) {
             notifMessage = "";
         }
@@ -312,8 +318,8 @@ public class NotificationListenerService extends android.service.notification.No
             }
         }
 
-        Log.d(TAG, "message \t " + message);
-        Log.d(TAG, "keywordReply \t " + keywordReply);
+//        Log.d(TAG, "message \t " + message);
+//        Log.d(TAG, "keywordReply \t " + keywordReply);
 
         if (!keywordReply.isEmpty()) {
             message = keywordReply;
@@ -330,17 +336,15 @@ public class NotificationListenerService extends android.service.notification.No
         cancelNotification(key);
         Log.d(TAG, "cancelNotification \t ");
 
-        Log.d(TAG, "i \t " + i);
+//        Log.d(TAG, "i \t " + i);
         i++;
-        Log.d(TAG, "i2 \t " + i);
+//        Log.d(TAG, "i2 \t " + i);
 
         if (i >= 2) {
             i = 0;
 
 
             try {
-                Log.d(TAG, "i3 \t " + i);
-                Log.d(TAG, "TRYYY \t ");
                 String url = Constants.API_PROCESSING_STAT_SMS + "?token=" + Stash.getString(Constants.TOKEN);
                 Log.d(TAG, "url \t " + url);
                 /*Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));

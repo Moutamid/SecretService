@@ -39,6 +39,7 @@ import android.telephony.SmsManager;
 import android.telephony.TelephonyManager;
 import android.util.Log;
 import android.view.Gravity;
+import android.view.ViewGroup;
 import android.view.Window;
 import android.view.WindowManager;
 import android.view.accessibility.AccessibilityManager;
@@ -54,6 +55,7 @@ import com.fxn.stash.Stash;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.tasks.Task;
+import com.google.android.material.checkbox.MaterialCheckBox;
 import com.google.firebase.FirebaseApp;
 import com.google.firebase.messaging.FirebaseMessaging;
 import com.moutamid.secretservice.activities.AngelsListActivity;
@@ -386,32 +388,34 @@ public class MainActivity extends AppCompatActivity {
             if (Stash.getBoolean(Constants.IS_TOKEN_VERIFY, false)) {
                 if (Stash.getArrayList(Constants.ANGELS_LIST, ContactModel.class).size() >= 1) {
                     if (!checkGPSStatus()) {
-                        if (Stash.getBoolean(Constants.IS_ALERT_ON, false)) {
-                            binding.alert.setCardBackgroundColor(getResources().getColor(R.color.bg_color_trans));
-                            binding.alertIco.setImageTintList(ColorStateList.valueOf(getResources().getColor(R.color.white)));
-                            binding.alertText.setTextColor(getResources().getColor(R.color.text_color));
 
-                            if (wakeLock.isHeld()) {
-                                wakeLock.release();
-                            }
+                        if (Stash.getBoolean(Constants.ALERT_CHECK, false)) {
+                            if (Stash.getBoolean(Constants.IS_ALERT_ON, false)) {
+                                binding.alert.setCardBackgroundColor(getResources().getColor(R.color.bg_color_trans));
+                                binding.alertIco.setImageTintList(ColorStateList.valueOf(getResources().getColor(R.color.white)));
+                                binding.alertText.setTextColor(getResources().getColor(R.color.text_color));
 
-                            Stash.put(Constants.IS_ALERT_ON, false);
+                                if (wakeLock.isHeld()) {
+                                    wakeLock.release();
+                                }
+
+                                Stash.put(Constants.IS_ALERT_ON, false);
 //                            stopService(new Intent(this, AudioRecordingService.class));
-                            Stash.put(Constants.ONE_TIME, false);
-                            stopRecording();
-                            if (timer != null) {
-                                timer.cancel();
-                            }
-                            uploadAlertStatus();
-                            Constants.showToast(MainActivity.this, "Alert Status OFF");
-                        } else {
-                            binding.alert.setCardBackgroundColor(getResources().getColor(R.color.pink));
-                            binding.alertIco.setImageTintList(ColorStateList.valueOf(getResources().getColor(R.color.white)));
-                            binding.alertText.setTextColor(getResources().getColor(R.color.white));
+                                Stash.put(Constants.ONE_TIME, false);
+                                stopRecording();
+                                if (timer != null) {
+                                    timer.cancel();
+                                }
+                                uploadAlertStatus();
+                                Constants.showToast(MainActivity.this, "Alert Status OFF");
+                            } else {
+                                binding.alert.setCardBackgroundColor(getResources().getColor(R.color.pink));
+                                binding.alertIco.setImageTintList(ColorStateList.valueOf(getResources().getColor(R.color.white)));
+                                binding.alertText.setTextColor(getResources().getColor(R.color.white));
 
-                            wakeLock.acquire();
+                                wakeLock.acquire();
 
-                            Stash.put(Constants.IS_ALERT_ON, true);
+                                Stash.put(Constants.IS_ALERT_ON, true);
 /*                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                                 Log.i("onReceive: ", "        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {");
                                 startForegroundService(new Intent(this, AudioRecordingService.class));
@@ -419,27 +423,30 @@ public class MainActivity extends AppCompatActivity {
                                 Log.i("onReceive: ", "} else {");
                                 startService(new Intent(this, AudioRecordingService.class));
                             }*/
-                            Stash.put(Constants.ONE_TIME, true);
-                            startRecording();
-                            Constants.showToast(MainActivity.this, "Alert Status ON");
-                            fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(this);
-                            ArrayList<ContactModel> contactModels = Stash.getArrayList(Constants.ANGELS_LIST, ContactModel.class);
-                            if (Stash.getBoolean(Constants.ONE_TIME)) {
-                                for (ContactModel contactModel : contactModels) {
-                                    String message = "ALERT ANGEL ACTIVATE : see the position and listen to what's going on at https://secret-service.be/alert.php?k=" + Stash.getString(Constants.TOKEN);
-                                    sendAutoMessage(contactModel.getContactNumber(), message);
+                                Stash.put(Constants.ONE_TIME, true);
+                                startRecording();
+                                Constants.showToast(MainActivity.this, "Alert Status ON");
+                                fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(this);
+                                ArrayList<ContactModel> contactModels = Stash.getArrayList(Constants.ANGELS_LIST, ContactModel.class);
+                                if (Stash.getBoolean(Constants.ONE_TIME)) {
+                                    for (ContactModel contactModel : contactModels) {
+                                        String message = "ALERT ANGEL ACTIVATE : see the position and listen to what's going on at https://secret-service.be/alert.php?k=" + Stash.getString(Constants.TOKEN);
+                                        sendAutoMessage(contactModel.getContactNumber(), message);
+                                    }
                                 }
-                            }
 
-                            timer = new Timer();
-                            timer.scheduleAtFixedRate(new TimerTask() {
-                                @Override
-                                public void run() {
-                                    stopRecording();
+                                timer = new Timer();
+                                timer.scheduleAtFixedRate(new TimerTask() {
+                                    @Override
+                                    public void run() {
+                                        stopRecording();
 //                                    startRecording();
-                                    uploadAudio();
-                                }
-                            }, 30000, 30000);
+                                        uploadAudio();
+                                    }
+                                }, 30000, 30000);
+                            }
+                        } else {
+                            showAlertCheck();
                         }
                     }
                 } else {
@@ -450,6 +457,30 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+    }
+
+    private void showAlertCheck() {
+        Dialog dialog = new Dialog(this);
+        dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
+        dialog.setContentView(R.layout.alert_check);
+        dialog.getWindow().setBackgroundDrawable(new ColorDrawable(android.graphics.Color.TRANSPARENT));
+        dialog.setCancelable(true);
+
+        Button confirm = dialog.findViewById(R.id.confirm);
+        MaterialCheckBox checkBox = dialog.findViewById(R.id.check);
+
+        confirm.setOnClickListener(v -> {
+            if (checkBox.isChecked()) {
+                Stash.put(Constants.ALERT_CHECK, true);
+                dialog.dismiss();
+            } else {
+                Toast.makeText(this, "Please check the Alert Button Notice", Toast.LENGTH_SHORT).show();
+            }
+        });
+
+        dialog.show();
+        dialog.getWindow().setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+        dialog.getWindow().setGravity(Gravity.CENTER);
     }
 
     private void showAlert() {
